@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script type="text/javascript" src="screen.js"></script>
+<script type="text/javascript" src="makemap.js"></script>
+<script type="text/javascript" src="dog.js"></script>
+<script type="text/javascript" src="inventory.js"></script>
+<script type="text/javascript" src="bighand.js"></script>
+<script type="text/javascript" src="enemy.js"></script>
+<script type="text/javascript" src="encount.js"></script>
+<script type="text/javascript" src="spellcast.js"></script>
+<script type="text/javascript" src="keyboard.js"></script>
+<title>クム犬</title>
+<style>
+body {
+   font-size:12pt;
+   line-height: 16px;
+}
+
+/* for main screen */
+
+#gamedisp {position:relative; background-color:#ccc; width:640px; height:400px; }
+#bg { position:absolute; top:0; left:0; z-index:0; width:640px; height:400px; opacity:.5; }
+#bgdam { position:absolute; top:0; left:0; z-index:0; width:640px; height:400px; opacity:1; background-color:red; display:none; }
+.poison {
+    background-color:#0f0;
+}
+.dying {
+    background-color:#0ff;
+}
+.sleep {
+    background-color:#00f;
+}
+
+#map{
+    position:absolute; left:144px; top:88px; width:352px; height:224px;
+    background-color:black;
+}
+#curtain {
+    position:absolute; left:0;
+    width:100%; height:0;
+}
+#curtain.stair {
+    background-color: gray;
+    opacity:1;
+}
+#curtain.water {
+    background-color: #0cf;
+    opacity:.5;
+}
+#map .cell, #itemsp .cell, #me {
+  width:32px;
+  height:32px;
+  position:relative;
+  float:left;
+  overflow:hidden;
+  //border:1px solid gray;
+}
+#me {
+   position: absolute;
+   background-color: transparent;
+   position:absolute; left:160px; top:128px; width:32px; height:32px;
+}
+
+#itemsp { position:absolute; left:8px; top:216px; width:128px; height:64px; }
+#itemsp .cell img { position:relative; top: -64px; }
+#lang      img { left: 0px; }
+#slipper   img { left :-32px; }
+#weather   img { left :-64px; }
+#home      img { left :-96px; }
+#chattable img { left :-128px; }
+#basket    img { left :-160px; }
+#depth     img { left :0px; top:-96px; }
+#compass   img { left :-96px; top: -32px; }
+
+#abnormal { position:absolute; left:8px; top:296px; width:128px; height:15px; font-size:20px; font-weight:bold; color:red; }
+#lifecap  { position:absolute; left:8px; top:321px; width:64px; height:15px; background-color:white; opacity:.7; }
+#life     { position:absolute; left:8px; top:321px; width:34px; height:15px; background-color:red;   opacity:1; font-size: 12px; }
+
+/* for textboxes */
+.box {
+  position:absolute;
+  border: solid black 1px;
+  background-color:white;
+  box-shadow:5px 5px 0 0 #888;
+}
+
+#textbox {
+    left:144px; top:320px; width:351px; height:63px;
+    overflow:hidden;
+}
+#text {
+    bottom:0;
+    line-height:20px;
+    margin: 2px 5px;
+    font-family:monospace;
+    position:absolute;
+    white-space: pre-wrap;
+}
+
+
+#propertybox { left:8px; top:344px; width:127px; height:39px; }
+#property {
+    margin: 2px 5px;
+    line-height:16px;
+    text-align:right;
+}
+
+#menubox { right:15px; top:216px; width:119px; height:167px; }
+.menuoption { margin-left:24px; }
+
+#menu, #submenu, #kago {
+  line-height:20px;
+  margin: 5px 2px;
+}
+
+#submenubox {
+   right:15px; top:216px; width:119px; height:100px; display:none;
+   z-index:1;
+}
+
+#submenubox.keyshop {
+   top: 100px;
+   width: 200px;
+}
+
+#submenubox.town {
+   top: 40px;
+}
+
+#kagobox {
+   left:504px; top:110px; width:119px; height:273px; display:none;
+}
+#kago hr {
+     border:solid red 1px; margin:2px;
+}
+
+.selected:before, #jtext {
+   content: 'J';
+   margin-left:-20px;
+   display:block;
+   position:absolute;
+   text-align:center;
+   width:11px;
+   height:11px;
+   font-size:11px;
+   line-height:11px;
+   overflow:hidden;
+   border-color:gray;
+   border-style:double;
+   border-right: solid gray 4px;
+   border-bottom: solid gray 4px;
+   border-radius: 5px;
+   animation:blink .2s ease-in-out infinite alternate;
+}
+#jtext {
+    animation:blink .2s ease-in-out infinite alternate;
+    position:absolute; right:2px; bottom:2px; margin:2px; 5px; display:none;
+}
+@keyframes blink{
+  0% { opacity:.3; }
+  100% {opacity:1;}
+}
+
+/* for inventory */
+#inventory {
+  width: 100%;
+  border:none;
+  position:absolute; right:0; top:0; height:210px; background-color:white; display:none; overflow:hidden;
+}
+#inventory_menu, #inventory_sellmenu
+{ position:absolute; left:8px; top:34px; width:80px; line-height:20px; }
+
+#inventory.battle {
+   width: 180px;
+   right: 10px;
+   border: 1px solid red;
+   box-shadow:5px 5px 0 0 #888;
+}
+
+#inventory.battle table#item {
+   left: 20px;
+}
+
+table#item td {
+   border: 1px solid black;
+   min-width: 108px;
+   width: 108px;
+   height: 18px;
+   margin: 0;
+   padding-left: 20px;
+}
+
+table#item {
+   position: absolute;
+   left: 100px;
+   top: 32px;
+   border-collapse: collapse;
+   border-spacing: 0;
+}
+.checked {
+    background-color:green;
+    color:white;
+}
+
+/* for scriptbook */
+
+#scriptbook {
+    position:absolute; left:230px; top:250px; width:180px; height:50px;
+    background-color:black; display:none;
+    border:solid 1px #0f0; color:#0f0;
+    line-height:20px; font-size:16px;
+    padding: 5px; box-sizing:border-box;
+}
+#myscript { white-space:pre; margin-left:5px; font-family:monospace; }
+
+
+/* for score records */
+#score {
+    position:absolute; left:0; top:0; width:640px; height:210px; background-color:black;
+    display:block; color: white;
+}
+#graph {
+    position:absolute; width:480px; height:160px; bottom:20px; left:64px;
+}
+.kudari {
+    position:absolute; z-index:1;
+    position: relative;
+    height: 0px;
+    width: 0px;
+    border-top:  160px solid transparent;
+    border-left: 160px solid blue;
+}
+.kudari:before {
+    content: '';
+    position: absolute;
+    border-top: 160px solid transparent;
+    border-left: 160px solid white;
+    left: -161px;
+    top: -159px;
+}
+.nobori {
+    position:absolute; z-index:1;
+    position: relative;
+    height: 0px;
+    width: 0px;
+    border-top: 2px solid transparent;
+    border-right:  160px solid blue;
+}
+.nobori:before {
+    content: '';
+    position: absolute;
+    border-top: 2px solid transparent;
+    border-right:  160px solid white;
+    left: 1px;
+    top: 4px;
+}
+#score .bar {
+    width:30px;
+    text-align:right;
+}
+
+#score .bar:after {
+    //position: absolute;
+    border-bottom: 1px solid #0ff;
+    width:480px;
+    height:19px;
+}
+#graph .level { position: absolute; color: white; bottom: -18px; width: 24px; text-align: center; display: none; }
+#graph .miss  { position: absolute; background-color: #f0f; bottom: 0px; width: 7px; height: 10px; display: none; }
+#graph .speed { position: absolute; background-color: #0f0; bottom: 157px; width: 6px; height: 6px; border-radius: 50%; display: none; }
+#graph .yscale { position: absolute; color:white; left: -24px; }
+#graph .xaxis { position: absolute; background-color:white; left: 0px; width: 480px; height: 1px; }
+
+/* for keyboard status */
+#keyboard {
+    position:absolute; left:0; top:0; width:640px; height:210px; background-color:gray; color:white;
+}
+.key, .enterkey {
+    width:26px; 
+    height:26px;
+    line-height:26px;
+    background-color:yellow; //opacity:.5; 
+    border:solid 1px black;
+    border-radius: 5px;
+    margin-right:4px;
+    margin-bottom:4px;
+    float:left;
+    color:black;
+    text-align:center;
+}
+.key span {
+  line-height: 20px;
+  width:12px;
+  overflow:hidden;
+  display:inline-block;
+}
+.key span:first-child {
+  vertical-align: bottom;
+}
+.key span:nth-child(2) {
+  vertical-align: top;
+}
+
+.enterkey {
+    position:relative;
+    width:44px;
+    border-bottom-right-radius: 0px;
+}
+.enterkey:before {
+    content:"";
+    position: absolute;
+    width: 29px;
+    height: 32px;
+    border:1px solid black;
+    background-color: yellow;
+    border-top:none;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    //border-radius: 5px;
+    right: -1px;
+    top: 26px;
+}
+
+.enterkey.lost:before {
+    background-color: gray;
+}
+
+.key.lost {
+   opacity: .5;
+   background-color: transparent;
+}
+.key.light, .enterkey.light:before {
+  background-color: green;
+}
+.key.lost.light,
+.enterkey.lost.light:before {
+  border-color: #f0f;
+  background-color: white;
+}
+
+/* typing encounter */
+
+#enemy { position:absolute; left:256px; top:5px; width:128px; height:210px; background-color:black; display:none; color:white; }
+#enemyname { position:absolute; left:3px; bottom:0px; width:122px; height:20px; background-color:black; color:white; }
+#enemylife { postion: absolute; width:100%; top:2px; height:5px; background-color:red; }
+#longscript {position:absolute; left:136px; top:0; width:368px; height:210px; background-color:black; display:none; }
+.enemyscript, .rescript, .eggscript {
+    position:absolute;
+    left:8px;
+    height:20px;
+    color:white;
+    font-size:16px;
+    font-family:monospace;
+    white-space: pre;
+}
+
+.eggscript {
+  color:#888;
+}
+
+.rescript {
+  color:#ff0;
+}
+
+</style>
+</head>
+<body>
+  <div id="gamedisp">
+    <div id="bg"></div>
+    <div id="bgdam"></div>
+
+    <div id="textbox" class="box">
+      <div id="text"></div>
+      <div id="jtext">J</div>
+    </div>
+
+    <div id="menubox" class="box">
+      <div id="menu">
+        <div class="menuoption">話す/調べる</div>
+        <div class="menuoption">所持品</div>
+        <div class="menuoption">呪文</div>
+        <div class="menuoption">キーボード</div>
+        <div class="menuoption">スコア</div>
+        <div class="menuoption">システム</div>
+      </div>
+    </div>
+
+    <div id="submenubox" class="box">
+      <div id="submenu">
+        <div class="menuoption">戦う</div>
+        <div class="menuoption">所持品使用</div>
+        <div class="menuoption">呪文</div>
+        <div class="menuoption">逃げる</div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+        <div class="menuoption"></div>
+      </div>
+    </div>
+
+    <div id="kagobox" class="box">
+      <div id="kago">
+        <div class="menuoption">商品を取る</div>
+        <div class="menuoption">終了</div>
+        <hr />
+        <div style="text-align:right;" id="kagosum">0 spc</div>
+        <div class="menuoption">ケムリ苔</div>
+        <div class="menuoption">ケムリ苔</div>
+        <div class="menuoption">キノコナッツ</div>
+        <div class="menuoption">キノコナッツ</div>
+        <div class="menuoption">キノコナッツ</div>
+        <div class="menuoption">キノコナッツ</div>
+        <div class="menuoption">キノコナッツ</div>
+        <div class="menuoption">キノコナッツ</div>
+        <div class="menuoption">キノコナッツ</div>
+        <div class="menuoption">キノコナッツ</div>
+      </div>
+    </div>
+
+    <div id="propertybox" class="box">
+      <div id="property">
+        <div><span id="expr"></span>/<span id="exprc"></span>exp</div>
+        <div><span id="spic"></span>spc</div>
+      </div>
+    </div>
+
+    <div id="abnormal">毒透狂闇</div>
+
+<!--
+    <div id="lifebox" style="position:absolute; left:8px; top:321px; width:128px; height:15px; background-color:#7f7f7f;opacity:.7;">a</div>
+-->
+    <div id="lifecap"></div>
+    <div id="life"></div>
+
+    <div id="itemsp">
+      <div id="lang" class="cell"></div>
+      <div id="depth" class="cell"></div>
+      <div id="compass" class="cell"></div>
+      <div id="slipper" class="cell"></div>
+      <div id="weather" class="cell"></div>
+      <div id="home" class="cell"></div>
+      <div id="chattable" class="cell"></div>
+      <div id="basket" class="cell"></div>
+    </div>
+
+    <div id="map">
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div>
+      <div id="curtain"></div>
+      <div id="me"></div>
+    </div>
+
+    <div id="enemy">
+      <div id="enemyname"></div>
+      <div id="enemylife"></div>
+      <div class="enemyscript" style="top:16px;">12345678901234</div>
+      <div class="enemyscript" style="top:48px;">12345678901234</div>
+      <div class="eggscript"   style="top:12px;">12345678901234</div>
+      <div class="eggscript"   style="top:44px;">12345678901234</div>
+      <div class="rescript"    style="top:32px;">12345678901234</div>
+      <div class="rescript"    style="top:64px;">12345678901234</div>
+      <div class="fig" style="top:85px; position:absolute; width:100%; height:100px; text-align:center;">
+        <img src="./fig/alphabet_character_a.png" style="height:100px;">
+        <span class="egg" style="display:inline-block; margin-top:50px; width:25px; height:35px; 
+                                 -webkit-border-radius: 20px 20px 20px 20px / 20px 20px 30px 30px;
+                                 border-radius:         50%  50%  50%  50%  / 40%   40%   60%  60%;
+                                 border:1px solid #f09;text-align:center; box-shadow:2px 2px 0 0 #a06">
+          <span style="display:block; width:6px; margin:5px 0 0 15px; height:6px; border-radius:50%; background-color:#f09;"></span>
+        </span>
+      </div>
+    </div>
+
+    <div id="longscript">
+      <div style="font-family:monospace; color:white; margin: 2px;" class="kbclose">(ffff=中止)</div>
+      <div style="font-family:monospace; color:#0f0; margin: 20px 2px; text-align:right;"
+           id="speedmeter">
+        <div id="" style="width:100%; background:green; height:10px; overflow:hidden;">
+          <div id="speedbar" style="width:100%; background:#0f0; height:10px;"></div>
+        </div>
+        計測中: <span id="speed">0</span> w/m
+      </div>
+      <div class="enemyscript" style="top: 8px;">12345678901234567890123456789012345678901234</div>
+      <div class="enemyscript" style="top:40px;">12345678901234567890123456789012345678901234</div>
+      <div class="enemyscript" style="top:72px;">12345678901234567890123456789012345678901234</div>
+      <div class="enemyscript" style="top:104px;">12345678901234567890123456789012345678901234</div>
+      <div class="enemyscript" style="top:136px;">12345678901234567890123456789012345678901234</div>
+      <div class="enemyscript" style="top:168px;">12345678901234567890123456789012345678901234</div>
+      <div class="rescript" style="top:24px;">12345678901234</div>
+      <div class="rescript" style="top:56px;">12345678901234</div>
+      <div class="rescript" style="top:88px;">12345678901234</div>
+      <div class="rescript" style="top:120px;">12345678901234</div>
+      <div class="rescript" style="top:152px;">12345678901234</div>
+      <div class="rescript" style="top:184px;">12345678901234</div>
+    </div>
+
+
+    <div id="keyboard">
+      <span><b>KEYBOARD</b> <span style="font-family:monospace;" id="kbclose">(ffff=終了)</span></span>
+      <div style="position:absolute; top:19px; left:82px;">
+        <div class="keyrow">
+          <div class="key">Esc</div>
+          <div class="key">1!</div><div class="key">2&quot;</div>
+          <div class="key">3#</div><div class="key">4$</div><div class="key">5%</div>
+          <div class="key">6&</div><div class="key">7'</div><div class="key">8(</div>
+          <div class="key">9)</div><div class="key">0</div><div class="key">-=</div>
+          <div class="key">^~</div><div class="key">\|</div><div class="key">BS</div>
+        </div>
+        <div class="keyrow">
+          <div class="key" style="width:40px;">Tab</div>
+          <div class="key">Q</div><div class="key">W</div>
+          <div class="key">E</div><div class="key">R</div><div class="key">T</div>
+          <div class="key">Y</div><div class="key">U</div><div class="key">I</div>
+          <div class="key">O</div><div class="key">P</div><div class="key">@`</div>
+          <div class="key">[{</div>
+          <div class="key enterkey">Enter</div>
+        </div>
+        <div class="keyrow">
+          <div class="key" style="width:54px;">Caps</div>
+          <div class="key">A</div>
+          <div class="key">S</div><div class="key">D</div><div class="key">F</div>
+          <div class="key">G</div><div class="key">H</div><div class="key">J</div>
+          <div class="key">K</div><div class="key">L</div><div class="key">;</div>
+          <div class="key">:*</div><div class="key">]}</div>
+        </div>
+        <div class="keyrow">
+          <div class="key" style="width:68px;">Shift</div>
+          <div class="key">Z</div><div class="key">X</div><div class="key">C</div>
+          <div class="key">V</div><div class="key">B</div><div class="key">N</div>
+          <div class="key">M</div><div class="key">,&lt;</div>
+          <div class="key">.&gt;</div><div class="key">/?</div>
+          <div class="key">_</div><div class="key" style="width:48px;">Shift</div>
+        </div>
+        <div class="keyrow">
+          <div class="key" style="width:40px;">Ctrl</div>
+          <div style="float:left; width:28px; height:20px;"></div>
+          <div class="key" style="width:40px;">Alt</div>
+          <div class="key" style="width:234px;"></div>
+          <div class="key" style="width:40px;">Alt</div>
+          <div style="float:left; width:28px; height:20px;"></div>
+          <div class="key" style="width:40px;">Ctrl</div>
+        </div>
+      </div>
+      <div style="position:absolute; left:10px; right:10px; bottom:1px; height:32px; overflow:hidden;">
+        <div id="lecture" style="white-space: pre-wrap; font-family:monospace; bottom:0; position:absolute;">????
+        </div>
+      </div>
+    </div>
+
+    <div id="score">
+      <span><b>SCORE</b> (f=終了)</span>
+      <div id="graph">
+        <svg width="480" height="210">
+          <path id="linegraph"
+             d="m 64,40 32,0"
+             style="fill: none;stroke:#0f0; stroke-width:2; stroke-linecap:butt; stroke-linejoin:miter; stroke-opacity:1; stroke-dasharray:none" />
+        </svg>
+        <div class="general" style="bottom:   2px; left: 488px; position: absolute; color: #f0f;">MISS(%)</div>
+        <div class="general" style="bottom:  62px; left: 488px; position: absolute; color: #0f0;">SPEED<br/>(words/m)</div>
+        <div class="general" style="bottom: 165px; left: 120px; position: absolute; color: white;">AVERAGE: <span id="avgscore">0</span>words/m</div>
+        <div class="level">s</div><div class="level">s</div><div class="level">s</div><div class="level">s</div>
+        <div class="level">s</div><div class="level">s</div><div class="level">s</div><div class="level">s</div>
+        <div class="level">s</div><div class="level">s</div><div class="level">s</div><div class="level">s</div>
+        <div class="level">s</div><div class="level">s</div><div class="level">s</div><div class="level">s</div>
+        <div class="level">s</div><div class="level">s</div><div class="level">s</div><div class="level">s</div>
+        <div class="miss"></div><div class="miss"></div><div class="miss"></div><div class="miss"></div>
+        <div class="miss"></div><div class="miss"></div><div class="miss"></div><div class="miss"></div>
+        <div class="miss"></div><div class="miss"></div><div class="miss"></div><div class="miss"></div>
+        <div class="miss"></div><div class="miss"></div><div class="miss"></div><div class="miss"></div>
+        <div class="miss"></div><div class="miss"></div><div class="miss"></div><div class="miss"></div>
+        <div class="speed"></div><div class="speed"></div><div class="speed"></div><div class="speed"></div>
+        <div class="speed"></div><div class="speed"></div><div class="speed"></div><div class="speed"></div>
+        <div class="speed"></div><div class="speed"></div><div class="speed"></div><div class="speed"></div>
+        <div class="speed"></div><div class="speed"></div><div class="speed"></div><div class="speed"></div>
+        <div class="speed"></div><div class="speed"></div><div class="speed"></div><div class="speed"></div>
+        <div class="xaxis"></div><div class="xaxis"></div><div class="xaxis"></div><div class="xaxis"></div>
+        <div class="xaxis"></div><div class="xaxis"></div><div class="xaxis"></div><div class="xaxis"></div>
+        <div class="xaxis"></div>
+        <div class="yscale">0</div><div class="yscale">10</div><div class="yscale">20</div><div class="yscale">30</div>
+        <div class="yscale">40</div><div class="yscale">50</div><div class="yscale">60</div><div class="yscale">70</div>
+        <div class="yscale">80</div>
+
+      </div>
+    </div>
+
+    <div id="scriptbook">
+      <div>呪文を唱える (f=中止)</div>
+      <div id="myscript"></div>
+    </div>
+
+    <div id="inventory">
+      <span>
+        <b>INVENTORY</b> (f=終了)(Shift+SPACE=逆走)
+      </span>
+      <div id="inventory_menu">
+        <div class="menuoption">終了</div>
+        <div class="menuoption">使う</div>
+        <div class="menuoption">移動</div>
+        <div class="menuoption">ソート</div>
+        <div class="menuoption">捨てる</div>
+      </div>
+      <div id="inventory_sellmenu">
+        <div class="menuoption checked">売る</div>
+      </div>
+      <table id="item">
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td></tr>
+      </table>
+
+    </div>
+
+
+  </div>
+  <hr>
+  <p>
+    <input id="keyinput" type="tel" style="ime-mode:inactive; border-radius:50%; font-size:1px; width:2px; height:3px; line-height:15px; color:black; background-color:black; border:none;"/>
+    FとJのところに両手の人差し指を置いてください。
+    「F」で歩行、「J」でメニュー選択、「スペース」で方向切替です。
+    <span id="debug" style="font-family:monospace;"></span>
+  </p>
+  <hr>
+  
+</body></html>
