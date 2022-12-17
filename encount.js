@@ -207,19 +207,18 @@ const Encounter = function()
         Jumongaeshi(0, battle);
     };
 
-    const uchiowari = function(mistype, damage) {
+    const uchiowari = function(mistype) {
         total_mistype += mistype;
 
         if (!eggturn) {
-            if (!damage) {
-                // Todo: 攻撃力仮算出
-                let base = [10,20,40,96,160,260,360,490,650].findIndex(v => ch.expr < v);
-                if (base < 0) base = parseInt(13/2 + Math.sqrt(ch.expr - 512) / 4.7);
-                let keylen = 48 - ch.lostkey.split("+").shift().length;
-                console.log("base/keylen=",base,keylen);
-                let attack = 3 + base + keylen;
-                damage = attack - GetRand(attack < 12 ? 4 : (attack / 4));
-            }
+            // Todo: 攻撃力仮算出
+            let base = [10,20,40,96,160,260,360,490,650].findIndex(v => ch.expr < v);
+            if (base < 0) base = parseInt(13/2 + Math.sqrt(ch.expr - 512) / 4.7);
+            let keylen = 48 - ch.lostkey.split("+").shift().length;
+            console.log("base/keylen=",base,keylen);
+            let attack = 3 + base + keylen;
+            damage = attack - GetRand(attack < 12 ? 4 : (attack / 4));
+
             enemy.life -= damage;
             TextBar(enemy.name + "は" + damage + "pt.のダメージを受けた。");
             $("#enemylife").css("width", (100 * enemy.life / enemylife) + "%");

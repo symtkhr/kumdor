@@ -125,12 +125,12 @@ let jumon = (level) => {
     
     let wordcard = make_wordcard();
     let spell = "";
-    while(spell.length < 1000) {
+    while((spell.length < 44 * 6) && wordcard.length) {
         let i = GetRand(wordcard.length);
         spell += wordcard[i] + " ";
         wordcard.splice(i,1);
     }
-    console.log(spell);
+    //console.log(spell);
     
     return spell.split(" ").filter(v => v.length)
         .map(v => (4 <= level) && (GetRand(7) == 0) ? (v[0].toUpperCase() + v.slice(1)) : v)

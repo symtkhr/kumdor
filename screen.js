@@ -450,8 +450,7 @@ let SysOpt = function() {
 
         submenu(["Yes", "No"], [() => {
             ch.load();
-            ch.layout = ch.layout == 101 ? 109 : 101;
-            ch.lostkey; // Todo: 109 "^:@_" to 101"='`"
+            Keyboard.changelayout(ch.layout == 101 ? 109 : 101);
             ch.save();
             location.reload();
         }], "layout");

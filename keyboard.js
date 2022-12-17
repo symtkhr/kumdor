@@ -107,7 +107,7 @@ let ObjKeyboard = function() {
         });
         lostkey.forEach(key => {
             const pos = {esc:[[0,0]], bs:[[0,-1]], enter:[[1,-1],[2,-1]], shift:[[3,0],[3,-1]],};
-            pos[key].map(v => $(".keyrow").eq(v[0]).children(".key").eq(v[1]).addClass("lost"));
+            (pos[key]||[]).map(v => $(".keyrow").eq(v[0]).children(".key").eq(v[1]).addClass("lost"));
         });
         $("#keyboard").show();
 
@@ -293,10 +293,22 @@ let ObjKeyboard = function() {
         }).join("");
     };
     
-    this.changelayout = function()
+    this.changelayout = function(layout)
     {
-
-
+        const MAPPING = ["^:_@".split(""), "='`".split("").concat("+at")];
+        const from = layout == 101 ? MAPPING[0] : MAPPING[1];
+        const into = layout == 101 ? MAPPING[1] : MAPPING[0];
+        ch.lostkey = ch.lostkey.split("+").map((k,n)=> {
+            if (n) {
+                let i = from.indexOf("+" + k);
+                return i < 0 ? ("+" + k) : into[i];
+            }
+            return k.split("").map(c => {
+                let i = from.indexOf(c);
+                return i < 0 ? c : into[i];
+            }).sort((a,b) => a.length-b.length).join("");
+        }).join("");
+        ch.layout = layout;
     };
 
     this.pick = (key, replacer) => {

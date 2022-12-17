@@ -72,7 +72,7 @@ ch.load = function()
 	Keyboard = new ObjKeyboard();
         Map.load({z:ch.z,map:ch.map});
 	Draw.all();
-	wandering();
+        (ch.map == 0) ? Opening() : wandering();
 	return;
     }
 
