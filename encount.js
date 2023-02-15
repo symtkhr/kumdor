@@ -71,19 +71,19 @@ const Jumongaeshi = function(xx, target) {
                         clearInterval(timer.handler);
                         return target.uchiowari(1);
                     }
-                }, 1000);
+                }, 3000 / (ch.targetspeed || 2));
             }
 
-            // 1秒にライフ1減 (100msに0.1減)
+            // 1秒にライフ1減 (30w/mで100msに0.1減)
             return setInterval(() => {
                 timer.sec++;
-                if (timer.sec % 20 == 0) console.log(
+                if (timer.sec % 20 == 0) CLOG(
                     Math.round(typed.length * 600 / 5 / timer.sec), "w/m"
                 );
                 if (ch.damage(1)) return;
-		clearInterval(timer.handler);
-		GameOver();
-            }, 100);
+                clearInterval(timer.handler);
+                GameOver();
+            }, 300 / (ch.targetspeed || 2));
         })(target);
 
         keytype([{c:"any", ontype:(c) => {
@@ -215,7 +215,7 @@ const Encounter = function()
             let base = [10,20,40,96,160,260,360,490,650].findIndex(v => ch.expr < v);
             if (base < 0) base = parseInt(13/2 + Math.sqrt(ch.expr - 512) / 4.7);
             let keylen = 48 - ch.lostkey.split("+").shift().length;
-            console.log("base/keylen=",base,keylen);
+            CLOG("base/keylen=",base,keylen);
             let attack = 3 + base + keylen;
             damage = attack - GetRand(attack < 12 ? 4 : (attack / 4));
 
@@ -260,7 +260,7 @@ const Encounter = function()
 
     const runaway = function(safe) {
         let bitten = (pena) => {
-            let dmg = parseInt(enemy.bite * (ch.map == 1 ? ch.lifebox : 1));
+            let dmg = parseInt(enemy.bite + (ch.map == 1 ? (ch.lifebox - 1) : 0));
             pena.message = pena.message.split("%d").join(dmg);
             ch.damage(dmg * 10);
             return pena;
@@ -288,13 +288,7 @@ const Encounter = function()
                  return true;
              }},
             {message: "しかし、キーを一個盗まれた。",
-             event: () => {
-                 const keys = "1234567890QWERTYUIOPASDGHKLZXCVBNM;:-^[]@,./_\\";
-                 let c = keys[GetRand(keys.length)];
-                 if (ch.lostkey.indexOf(c) != -1) return false;
-                 ch.lostkey += c;
-                 return true;
-             }},
+             event: () => { return Keyboard.stolen(); }},
         ];
         let penalty = function() {
             if (safe || enemy.penalty == 0) return;
@@ -335,17 +329,17 @@ const Encounter = function()
 const ChatTree = function(opt)
 {
     //var sec = 0;
-    console.log(opt);
+    CLOG(opt);
 
-    var escape = function() {
+    let escape = function() {
 	TextBar("ESCAPE!");
         //clearInterval(timer);
         $("#longscript").hide();
 	wandering();
     };
-    var uchiowari = function(mistype, sec) {
+    let uchiowari = function(mistype, sec) {
 	let misrate = Math.round(100 * mistype / (44 * 3));
-	let speed = (misrate > 20) ? 0 : Math.round(44 * 3 * 600 / 5 / sec);
+	let speed = (misrate > 20) ? 0 : Math.round(44 * 3 * 600 / 5 / sec / 3 * ch.targetspeed);
         let increase = (misrate > 20) ? 0: parseInt(speed / 10 * (mistype == 0 ? 2 : 1) + 15);
         ch.tree.push([ch.map, ch.towhere()]);
 	Map.replace(opt && opt.replacer || "T");

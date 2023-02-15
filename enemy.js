@@ -116,14 +116,14 @@ const inhabitation = `
 let Enemy = {};
 Enemy.make = (opt) => {
     let stager = ch.map == 5 ? (parseInt(ch.x / 40) + 6) : inhabitation[parseInt(ch.y/4)][parseInt(ch.x/4)]; //3 * ((ch.x < 40) ? 0 : 1) + parseInt(ch.y / 40);
-    console.log("enemy.stager=",stager);
+    CLOG("enemy.stager=",stager);
     if (stager=="*") return;
     if (!opt || !opt.stage) opt = {stage: stager};
     const stage = [0, 4, 7, 9, 12, 14, 17, 21, 24, 27, 32];
     const stage1 = [9, 14, 17, 21, 24, 27, 32, enemylist.length, 0];
     const stage0 = [0,  7, 12, 14, 17, 19, 27, 27, 0];
     const from = stage0[opt.stage];
-    console.log("enemy.id.range=", stage0[opt.stage], stage1[opt.stage]);
+    CLOG("enemy.id.range=", stage0[opt.stage], stage1[opt.stage]);
     //(0)nADF(4)JKL;(7);+(9)RYU(12)GQ(14)I@X(17)C/(19)VM7(22)10(24)-[*(27)ひぼせかう(32)もおいり
     const subset = enemylist.slice(stage0[opt.stage], stage1[opt.stage]);
     const id = GetRand(subset.length) + from;
@@ -146,7 +146,7 @@ Enemy.make = (opt) => {
         0x07 : "pig", 0x08 : "cheese",0x09 : "air",
         0x0a : "niboshi",0x0b : "nuts", 0x21 : "k",
     };
-    console.log("enemy.drop=", enemy.drop);
+    //CLOG("enemy.drop=", enemy.drop);
     return enemy;
 };
 

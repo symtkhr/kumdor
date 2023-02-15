@@ -1,8 +1,10 @@
 // 汎用関数
 const GetRand = (max) => parseInt(Math.random() * max);
+const inDebug = () => location.hash == "#debugging";
+const CLOG = (...arg) => inDebug() ? console.log(...arg) : {};
 Array.prototype.shuffle = function() {
     let array = this;
-    //console.log(array.map(v=>v.name));
+    //CLOG(array.map(v=>v.name));
     for (let i = array.length - 1; 0 < i; i--) {
 	const j = parseInt(Math.random() * (i + 1));
 	[array[i], array[j]] = [array[j], array[i]];

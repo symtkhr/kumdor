@@ -53,14 +53,14 @@ Ayamachiwa sunawachi aratamuruni habakarukoto nakare," to.
 
 let Spellcast = {};
 Spellcast.make = (opt) => {
-    console.log(opt);
+    CLOG(opt);
     if (!opt) opt = {level: 15};
     if (!opt.level && opt.enemy) opt.level = parseInt("*222222222555558889999ccceeefffffffff"[opt.enemy], 16);
     
     let spell =  jumon(opt.level);
     let cs = Keyboard.clevel([0, opt.level || 15]);
     cs += Keyboard.shift(cs) + " ";
-    console.log("cs=",cs);
+    CLOG("cs=",cs);
 
     // level < 8 なら句読点をすべて;とする
     if (opt.level < 8) spell = spell.split(".").join(";").split(",").join(";").split("?").join(";").split("!").join(";");
@@ -78,6 +78,14 @@ Spellcast.make = (opt) => {
             let symbols = `<>(){}[]""''`.split("").filter(c => cs.indexOf(c) != -1);
             let i = GetRand(symbols.length/2) * 2;
             return symbols[i] + v + symbols[i+1];
+        }
+        //数字
+        if (GetRand(2) < 1 && 10 <= level) {
+            let num = GetRand(1000).toString();
+            if (GetRand(4) < 1 && 1 < num.length) num = num[0] + "." + num.slice(1);
+            if (!GetRand(6)) num += "%"; else if (!GetRand(5)) num = "$" + num;
+            else if (!GetRand(4)) num = "\\" + num;
+            return v + " " + num + " ";
         }
         // 語接続
         if (GetRand(3) < 1 && (13 <= level)) {
@@ -106,13 +114,14 @@ $.ajax({
 });
 
 
+
 let jumon = (level) => {
 
     if (9 <= level && GetRand(4) == 0) return jum[GetRand(jum.length)];
 
     let l5 = "a sad dead all ask dad as see saw seesaw father quest raffle laugh yesterday after yes star ask qatar thursday tuesday saturday weekday week at we seek just talk key sky rude rare tea dash less eat fast duster fear fare request style gus geek least held sell tell used dead hall hell death lease head get stay study stash wash wall wake trust shark shake gate flew afterwards july august three teeth eye sugar wet status sweat sweater sheet start turtle east west slew useful fat full fake take quake earthquake earth date ladar jester dust release last weakest waseda takara yakata rakuda hakusha hakata";
     
-    console.log("auto spelling");
+    CLOG("auto spelling");
     
     let l2 = "a ad adak adal adass adj adja ads aja ajak ajal ajalak ajass aka akal akasaka akda ala alaff alaska alda alk alad all alls als as asa asal ask asks assa da dad dadak dadal dadass dadj dadja dads daja dajak dajal dajalak dajass daka dakal dakasak dakda dala dalaff dalaska dalda dalk dall dalls dals das dasa dasal dask dasks dassa fa fad fadak fadal fadass fadj fadja fads faja fajak fajal fajalak fajass faka fakal fakasak fakda fala falaff falaska falda falk fall falls fals fas fasa fasal fask fasks fassa ja jad jadak jadal jadass jadj jadja jads jaja jajak jajal jajalak jajass jak jaka jakal jakasak jakda jala jalaff jakalaska jalda jalk jall jalls jals jas jasa jasal jask jasks jassa ka kad kadak kadal kadass kadj kadja kads kaja kajak kajal kajalak kajass kaka kakal kakasak kakda kala kalaff kalaska kalda kalk kall kalls kals kas kasa kasal kask kasks kassa sa sad sadak sadal sadass sadj sadja sads saja sajak sajal sajalak sajass sak saka sakal sakasa sakda sal sala salaff salaska salda salk sall salls sals sas sasa sasal sask sasks sassaska skad skadak skadal skadass skadj skadja skads skaja skajak skajal skajalak skajass skaka skakal skaks skakda skala skalaff skalaska skalda skalk skall skalls skals skas skasa skasal skask skasks skassa".split(" ");
 
@@ -128,12 +137,13 @@ let jumon = (level) => {
     while((spell.length < 44 * 6) && wordcard.length) {
         let i = GetRand(wordcard.length);
         spell += wordcard[i] + " ";
-        wordcard.splice(i,1);
+        //wordcard.splice(i,1);
     }
-    //console.log(spell);
+    //CLOG(spell);
     
     return spell.split(" ").filter(v => v.length)
         .map(v => (4 <= level) && (GetRand(7) == 0) ? (v[0].toUpperCase() + v.slice(1)) : v)
         //.map(v => GetRand(10) < 1 ? (v + ";") : GetRand(10) < 1 ? (v + " +") : v)
         .join(" ");
 };
+

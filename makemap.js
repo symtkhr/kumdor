@@ -95,7 +95,7 @@ Map.jump = function(jumpto) {
         // ジャンプ先が座標指定の場合
         if (jumpto.loc) {
             let loc = jumpto.loc;
-	    console.log("loc=", loc, jumpto.sym, Map.symbol({x:loc[0], y:loc[1]}));
+	    CLOG("loc=", loc, jumpto.sym, Map.symbol({x:loc[0], y:loc[1]}));
             if (!jumpto.sym || Map.symbol({x:loc[0], y:loc[1]}) == jumpto.sym) return loc;
             // 指定した座標に一致しないシンボルがある場合は、近傍を検索する
 	    // (Todo:Map.FootEventを書き換える操作)
@@ -108,7 +108,7 @@ Map.jump = function(jumpto) {
         let objlist = Map.syb.map((row, y) => {
             return row.map((v,x) => v== jumpto.sym ? [x,y] : null).filter(v=>v);
         }).reduce((ret, a) => ret.concat(a), [])
-        console.log("entrance=", objlist);
+        CLOG("entrance=", objlist);
 
         if (jumpto.range) {
 	    // Todo:Map.FootEventを書き換える操作
@@ -294,7 +294,7 @@ const interact_footevents = (footlist, jumper) => {
         // 候補が複数ある場合はy座標が正方向で最寄りの上り階段を探す
         let yd = v.loc[1];
         let yu = to.map(v => v.loc[1]).sort((a,b)=>a-b).filter(yu => 3 < yu - yd).shift();
-        //console.log("yu=",to.map(v=>v.loc[1]),"xd/yd=",v.loc);
+        //CLOG("yu=",to.map(v=>v.loc[1]),"xd/yd=",v.loc);
         v.jump = {sym:42, loc:[v.loc[0], yu]};
         return v;
     });
@@ -419,6 +419,10 @@ const event_outmap = () => {
                 //Todo: (DP転落イベント)
             ]);
         }},
+        // 目標設定
+        {sym:0x3c, loc:[57,70], onstep:() => ch.settarget(3) },
+        {sym:0x3c, loc:[61,69], onstep:() => ch.settarget(4) },
+        {sym:0x3c, loc:[59,69], onstep:() => ch.settarget(5) },
         // 溶岩
         {sym:0x1b, onstep: () => {
             ch.damage(ch.isdone("slipper") ? 20 : 160, true);
@@ -470,7 +474,7 @@ const event_outmap = () => {
             let talks0 = [...Array(talks.length)].map((v,i)=>ch.treetalk.indexOf(i) < 0 ? i : -1).filter(v => v!= -1);
             let k = talks0[GetRand(talks0.length)];
             ch.treetalk.push(k);
-            console.log("addspeakevents");
+            CLOG("addspeakevents");
             Map.speakEvents.unshift({sym:0x12, loc:[to.x,to.y], branch: t => t[k]});
             return talks[k];
         }},

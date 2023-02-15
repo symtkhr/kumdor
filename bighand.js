@@ -331,10 +331,10 @@ BigHand.practice = function(level) {
 }
 
 BigHand.gate = function(level) {
-    console.log("gate");
+    CLOG("gate");
     if (ch.lostkey.split("+").shift().split("")
 	.every(key => Keyboard.clevel([0, level]).indexOf(key) < 0)) return true;
-    console.log("NG");
+    CLOG("NG");
     let to = ch.towhere(-1);
     if (Map.kabe(to)) return;
     ch.x = to.x;
@@ -348,10 +348,10 @@ BigHand.score = function() {
     $("#graph .level") .each(function(i) { $(this).css("left", i * 24); });
     $("#graph .miss")  .each(function(i) { $(this).css("left", i * 24 + 8); });
     $("#graph .speed") .each(function(i) { $(this).css("left", i * 24 + 9); });
-    $("#graph .yscale").each(function(i) { $(this).css("bottom", i * 20 - 8); });
-    $("#graph .xaxis") .each(function(i) { $(this).css("bottom", i * 20); });
-    $("#graph .xaxis") .eq(ch.scoretarget).css("background-color", "yellow");
-    $("#graph .yscale").eq(ch.scoretarget).css("color", "yellow");
+    $("#graph .yscale").each(function(i) { $(this).css("bottom", i * 20 - 8); })
+        .removeClass("target").eq(ch.targetspeed).addClass("target");
+    $("#graph .xaxis") .each(function(i) { $(this).css("bottom", i * 20); })
+        .removeClass("target").eq(ch.targetspeed).addClass("target");
     $(".miss, .speed, .level").hide();
 
     ch.score.map((v,i) => {

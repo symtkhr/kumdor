@@ -479,7 +479,7 @@ var ObjKago = function()
                 $opt.hide();
                 options.map((v,i) => $opt.eq(i).show().text(v));
                 $opt.removeClass("selected").eq(jm).addClass("selected");
-                //console.log(this.busket);
+                //CLOG(this.busket);
                 let list = Items.spec(this.busket);
                 list.map((v, i) => $opt.eq(i + 2).text(v.name).show());
                 let spc = list.reduce((sum, v) => sum + v.price[0], 0);

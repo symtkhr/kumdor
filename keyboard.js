@@ -34,7 +34,7 @@ let KeyShop = function(param) {
             };
         });
         callback.unshift(() => { wandering(); });
-        console.log(opt, callback);
+        CLOG(opt, callback);
         submenu(opt, callback, "keyshop");
     };
     Draw.sequence([
@@ -286,7 +286,7 @@ let ObjKeyboard = function() {
 	let max = range;
 	let min = range;
 	if (Array.isArray(range)) [min, max] = range;
-	console.log("key.clevel=", max,min);
+	CLOG("key.clevel=", max,min);
         return KEYALIGN.split("").filter((c,i) => {
             let l = parseInt("0x" + KEYLEVEL[i]);
             return (c != "*") && (l <= max) && (min <= l);
@@ -323,6 +323,14 @@ let ObjKeyboard = function() {
 
         Draw.sequence(seq);
     };
+    
+    this.stolen = () => {
+        const keys = KEYALIGN.split("").filter(c => "FJ `*SPARE".indexOf(c) < 0);
+        let c = keys[GetRand(keys.length)];
+        if (ch.lostkey.indexOf(c) != -1) return false;
+        ch.lostkey += c;
+        return true;
+    };
 };
 let Keyboard = new ObjKeyboard();
 
@@ -330,7 +338,7 @@ let Keyboard = new ObjKeyboard();
 // 文字列s・配列keycodes内のいずれかのキーが打たれたらcallback実行
 // 指定外の文字が打たれればcancel実行
 const keywait = function(callback, s, keycodes = [], cancel) {
-    console.log("wait" , keycodes, s);
+    CLOG("wait" , keycodes, s);
     if (!cancel) cancel = () => {};
 
     $(window).unbind().keydown(function(e){
@@ -398,9 +406,9 @@ var keywait0 = function(callback, s, keycodes) {
 
     $(window)
     .keydown( function(e){
-        console.log(e);//JSON.stringify(e));
+        CLOG(e);//JSON.stringify(e));
         var c = e.keyCode;
-        //console.log(c);
+        //CLOG(c);
         var index = keyarr.indexOf(c);
         if (index < 0) return;
 
@@ -422,7 +430,7 @@ var keywait0 = function(callback, s, keycodes) {
     })
 
     .keyup(function(e){
-        //console.log(e);//JSON.stringify(e));
+        //CLOG(e);//JSON.stringify(e));
         var c = e.keyCode;
         var index = keyarr.indexOf(c);
         if (index < 0) return;
@@ -446,7 +454,7 @@ var keywait0 = function(callback, s, keycodes) {
     .keypress( function(e){ 
         //入力文字の表示
         var c = (e.charCode) ? e.charCode : e.keyCode;
-        console.log(e);//JSON.stringify(e));
+        CLOG(e);//JSON.stringify(e));
         var index = keyarr.indexOf(c);
         if (index < 0) return;
         if (0x20 <= c && c < 0x80) {
@@ -462,7 +470,7 @@ var keywait0 = function(callback, s, keycodes) {
         
         // 記号系
         var index = keychar.indexOf(String.fromCharCode(c));
-        console.log(index);
+        CLOG(index);
         if (0 <= index) {
             keylight(keypos106[parseInt(index/2)], true);
         }

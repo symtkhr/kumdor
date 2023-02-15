@@ -15,7 +15,7 @@ let Dog = function() {
     this.exprc = 999;
     this.invent = [];
     this.score = [];
-    this.scoretarget = 3;
+    this.targetspeed = 2;
     this.lostkey = `ABCDEGHIKLMNOPQRSTUVWXYZ1234567890\\[],./;:@-^_+shift+bs+enter+esc`;
     this.jt = [];  // 異常種類p,t,mを掛かった順に記録
     this.dark = false;
@@ -36,10 +36,10 @@ let ch = new Dog;
 
 ch.load = function()
 {
-    if (0) {
-	ch.map = 4;
-	ch.x = 67; // 83=0x53
-	ch.y = 30; // 104=0x68
+    if (inDebug()) {
+	ch.map = 1;
+	ch.x = 57; // 83=0x53
+	ch.y = 70; // 104=0x68
         ch.chattable = true;
 	ch.muki = 2;
 	ch.z = 0;
@@ -49,12 +49,12 @@ ch.load = function()
 	ch.expr = 2000;
 	ch.exprc = 5000;
 	ch.invent = [1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 20, 20, 20, 20, 16, 16, 16, 23, 23, 23, 17];
-	ch.scoretarget = 3;
+	ch.targetspeed = 3;
         ch.score = [[60,10,3],[40,0,4],[30,4,11],[60,0,15],];
         ch.lostkey = `\\[]':@=-^_+esc`;
         ch.layout = 101;
 	//ch.lostkey = "";
-	ch.done = ["lang","depth","compass","slipper","weather"];
+	ch.done = ["lang","depth","compass","slipper","weather", "myhome"];
 
         Keyboard = new ObjKeyboard();
 	Map.load({z:ch.z,map:ch.map});
@@ -96,7 +96,7 @@ ch.savezone = function() {
 
 ch.save = () => {
     let ret = {};
-    "map,x,y,z,muki,life,lifebox,spice,expr,exprc,jt,dark,invent,score,scoretarget,chattable,lostkey,walldp,tree,warp,done,pick,visited,layout"
+    "map,x,y,z,muki,life,lifebox,spice,expr,exprc,jt,dark,invent,score,targetspeed,chattable,lostkey,walldp,tree,warp,done,pick,visited,layout"
         .split(",")
         .map(key => { ret[key] = ch[key]; });
     localStorage.setItem("save", JSON.stringify(ret));
@@ -105,7 +105,7 @@ ch.save = () => {
 ch.record_jump = (opt) =>
 {
     if (!opt) { ch.lastwarp = null; return; }
-    console.log(ch, JSON.stringify(opt));
+    CLOG(ch, JSON.stringify(opt));
     if (ch.map == 5 && opt.rec) {
 	ch.warp.push([opt.jump.map || ch.map, opt.jump.loc]);
     }
@@ -206,7 +206,7 @@ ch.stepon = function()
     if (!obj) {
         if (Map.jumper.indexOf(k) < 0) return;
         // 近場のジャンプイベントを採る
-	console.log("nearest point");
+	CLOG("nearest point");
         let foots = Map.FootEvents.filter(v => v.loc && v.sym == k)
             .sort((a,b) => (a.loc[0] - ch.x)**2 + (a.loc[1] - ch.y)**2 - (b.loc[0] - ch.x)**2 - (b.loc[1] - ch.y)**2);
         obj = foots.shift();
@@ -286,7 +286,7 @@ ch.hanasu = function()
     let to = ch.towhere();
     let k = Map.symbol(to);
 
-    //console.log(k, Map.across);
+    //CLOG(k, Map.across);
     if ((Map.across || []).indexOf(k) != -1) {
         to = ch.towhere(2);
         k = Map.symbol(to);
@@ -311,7 +311,7 @@ ch.hanasu = function()
 	let json = Map.talk.find(v => v.map == ch.map &&
 				 ((v.sym && !v.loc && v.sym == k) ||
 				  (v.loc && v.loc[0] == to.x && v.loc[1] == to.y)));
-        console.log(json, obj);
+        CLOG(json, obj);
 	if (json && (ch.map == 1 || Map.is_talker(ch.map, k))) {
 	    return obj ? {
 		onspoken: obj.onspoken,
@@ -327,14 +327,14 @@ ch.hanasu = function()
     };
 
     let event = get_speaking_event();
-    console.log(event);
+    CLOG(event);
     if (event.branch) {
 	return Draw.sequence(event.branch(event.talk || []));
     }
     if (!event.onspoken) {
 	return Draw.sequence(event.talk); 
     }
-    console.log(event);
+    CLOG(event);
     return event.onspoken(event.talk || []);
 };
 
@@ -467,6 +467,15 @@ ch.isdone = function(event)
     return (ch.done.indexOf(event) != -1);
 };
 
+ch.settarget = function(t)
+{
+    if (t < ch.targetspeed)
+        TextBar("目標w/mが下がった。");
+    if (ch.targetspeed < t)
+        TextBar("目標w/mが上がった。");
+    ch.targetspeed = t;
+};
+
 ch.purchase = function(param)
 {
     const buy = () => {
@@ -492,7 +501,7 @@ let wandering = function() {
     ch.state = "wandering";
     $("#jtext, #keyboard, #score, #scriptbook, #inventory").hide();
     Draw.outfits();
-    //dumpdebug();
+    if(inDebug()) dumpdebug();
     
     // key待ち
     $(window).unbind().keydown(function(e) {
@@ -554,13 +563,13 @@ let FogValley = function() {
 	    scan(x, y-1);
 	};
 	scan(ch.x, ch.y);
-	console.log(JSON.stringify(gate), fog, ch.x, ch.y);
+	CLOG(JSON.stringify(gate), fog, ch.x, ch.y);
 	return gate.length == 1 ? gate.pop() : [ch.x, ch.y];
     };
     
     this.enter = function () {
         if (this.enable) return;
-	console.log("enter");
+	CLOG("enter");
 
 	forefoot = (ch.x + ch.y) % 2;
 	if (ch.map == 1) {
@@ -577,7 +586,7 @@ let FogValley = function() {
     };
 
     this.exit = function () {
-	console.log("exit");
+	CLOG("exit");
 
         if (ch.map == 1 || !step) {
 	    this.enable = false;
@@ -596,7 +605,7 @@ let FogValley = function() {
 
 	step--;
 	forefoot = (forefoot + 1) % 2;
-	console.log("step:" + step);
+	CLOG("step:" + step);
 	if (ch.map == 1 && step < 4) ch.y = NORTHEND + 2 + step;
 	if (step <= 0) return this.exit();
 	this.make_north();
