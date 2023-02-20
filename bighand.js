@@ -335,11 +335,7 @@ BigHand.gate = function(level) {
     if (ch.lostkey.split("+").shift().split("")
 	.every(key => Keyboard.clevel([0, level]).indexOf(key) < 0)) return true;
     CLOG("NG");
-    let to = ch.towhere(-1);
-    if (Map.kabe(to)) return;
-    ch.x = to.x;
-    ch.y = to.y;
-    Draw.map();
+    ch.remand();
 };
 
 // ユーザデータ表示

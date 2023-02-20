@@ -497,6 +497,15 @@ ch.purchase = function(param)
     ]);
 };
 
+ch.remand = function()
+{
+    let to = ch.towhere(-1);
+    if (Map.kabe(to)) return;
+    ch.x = to.x;
+    ch.y = to.y;
+    setTimeout(()=> { Draw.map(); Draw.me(); }, 100);
+};
+
 let wandering = function() {
     ch.state = "wandering";
     $("#jtext, #keyboard, #score, #scriptbook, #inventory").hide();

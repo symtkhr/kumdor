@@ -524,10 +524,18 @@ var ObjKago = function()
 
     this.off = function() {
         if (this.taken) {
-            this.toggle();
+            if (4 == ch.map) return this.toggle();
+            Dialog("カゴを戻しておいてください。");
+            return ch.remand();
         }
     }
 
+    this.wrongway = function() {
+        if ((this.taken) && (ch.map < 4) && (ch.muki == 3)) {
+            Dialog("お会計は向こうです。");
+            return ch.remand();
+        }
+    };
     this.casher = function(message, fulload) {
         message = message || {
             confirm: "全部で[spc]spc.です。",
@@ -535,7 +543,12 @@ var ObjKago = function()
             error: "荷物がいっぱいです。",
             short: "スパイスが足りないようです。",
         };
-        if (!this.taken || (0 == this.busket.length)) return;
+        if ((ch.map < 4) && (ch.muki == 1)) {
+            Dialog("こちらは出口専用です。");
+            return ch.remand();
+        }
+        if ((!this.taken) || (0 == this.busket.length)) return;
+
         //var shoji = Shojihin("spec");
         let spc = (Items.spec(this.busket) || [])
             .reduce((sum, v) => sum + v.price[0], 0);

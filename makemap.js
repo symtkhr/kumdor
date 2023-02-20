@@ -398,14 +398,14 @@ const event_outmap = () => {
         {sym:0x1f, onstep: () => { // 断層
             let p = ch.towhere();
             let k = Map.symbol(p);
-            if (!ch.isdone("weather") || Map.kabe(p) || k == 0x00 || k == 0x1f) p = ch.towhere(-1);
+            if (!ch.isdone("weather") || Map.kabe(p) || k == 0x00 || k == 0x1f) return ch.remand();
             Map.jump({loc:[p.x,p.y]});
             return true;
         }},
         {sym:0x00, onstep: () => { // 断層
             let p = ch.towhere();
             let k = Map.symbol(p);
-            if (!ch.isdone("weather") || Map.kabe(p) || k == 0x00 || k == 0x1f) p = ch.towhere(-1);
+            if (!ch.isdone("weather") || Map.kabe(p) || k == 0x00 || k == 0x1f) return ch.remand();
             Map.jump({loc:[p.x,p.y]});
             return true;
         }},
@@ -638,11 +638,14 @@ const event_town2map = () => {
         {sym:0x0b, onstep: () => { ch.savezone(); }},
         
         {loc: [37,78], onstep: () => { Kago.casher(); }}, // rtyu
-        {loc: [37,81], onstep: () => { Kago.off(); }}, 
+        {loc: [37,81], onstep: () => { Kago.wrongway(); }}, 
         {loc: [36,78], onstep: () => { Kago.off(); }}, 
         {loc: [83,84], onstep: () => { Kago.casher(); }}, // qwe
+        {loc: [83,87], onstep: () => { Kago.wrongway(); }},
         {loc: [82,84], onstep: () => { Kago.off(); }}, 
         {loc: [102,42], onstep: () => { Kago.casher(); }}, // jkl;
+        {loc: [102,45], onstep: () => { Kago.wrongway(); }},
+        {loc: [101,42], onstep: () => { Kago.off(); }}, 
     ];
 
     ret.FootEvents = interact_footevents(footlist, ret.jumper);
@@ -904,10 +907,12 @@ const event_town3map = () => {
         {sym:0x2b, onstep: () => { ch.sleep(); }},
         {sym:0x28, onstep: () => { ch.savezone(); }},
         {sym:0x0b, onstep: () => { ch.savezone(); }},
-        {loc: [41,66], onstep: () => { Kago.off(); }},  // vbnm
+        {loc: [42,66], onstep: () => { Kago.wrongway(); }},  // vbnm
         {loc: [42,63], onstep: () => { Kago.casher(); }},
-        {loc: [55,20], onstep: () => { Kago.casher(); }}, //iopa
-        {loc: [52,24], onstep: () => { Kago.off(); }}, 
+        {loc: [41,63], onstep: () => { Kago.off(); }},
+        {loc: [55,23], onstep: () => { Kago.wrongway(); }}, //iopa
+        {loc: [55,20], onstep: () => { Kago.casher(); }}, 
+        {loc: [54,20], onstep: () => { Kago.off(); }},
         
         // 塔の屋上
         {sym:1, range:{x:[100,108],y:[70,78]}, onstep: () => {
