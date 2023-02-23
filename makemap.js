@@ -56,11 +56,21 @@ Map.town = function(exhaust) {
     submenu(options, onselect, "town");
 };
 
+Map.warning = (jumpto) => {
+    if ((jumpto.map == 1) && (jumpto.sym == 0x14) &&
+        !ch.isdone("loop") && ch.lostkey.split("").some(c => "ASD".indexOf(c) != -1)) {
+        Draw.sequence(["\v(注意:キーなしで魔獣と戦うのは危険です。"
+                       +"\n 村内でキーを入手してください。)",
+                       " "]);
+    }
+};
+
 // ジャンプイベント
 // 引数jumpto = {sym:N, map:N, range:{x:[A,B],y:[A,B]}, loc:[X,Y], stepin:BOOL}
 Map.jump = function(jumpto) {
     // マップ外移動
     if ((jumpto.map || jumpto.map == 0) && (ch.map != jumpto.map) && Map.load(jumpto)) return;
+    Map.warning(jumpto);
 
     // マップ内移動
     ch.map = jumpto.map || ch.map;
@@ -154,6 +164,7 @@ Map.jump = function(jumpto) {
     }
     Draw.map();
     Kago.off();
+    Bgm.run();
     return true;
 };
 
@@ -412,11 +423,22 @@ const event_outmap = () => {
         // DP入口
         {sym:0x1c, loc:[43,58], onstep: () => {
             Draw.sequence([
-                {t:("飲み込まれた。")},
-                {func:() =>{
-                    Map.jump({map:5, loc:[24,30]});
-                }},
+                "\v飲み込まれた。",
                 //Todo: (DP転落イベント)
+                () => { 
+                    $("#gamedisp").css("background", "black");
+	            $("#text").show();
+	            Draw.textbox(false);
+                    Map.jump({map:5, loc:[23,30]}); 
+                    Bgm.run("none");
+                },
+                "ド \t リ \t ー \t ム \t ポ \t イ \t ン \t ト。",
+                "あいたたたたた。\n\t誰だい人のアタマを踏んづけるのは。",
+                () => {
+	            $("#gamedisp").css("background", "");
+                    Draw.textbox(true);
+                    Bgm.run();
+                },
             ]);
         }},
         // 目標設定

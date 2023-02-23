@@ -30,6 +30,7 @@ let Dog = function() {
     this.visited = ["ASDF"];
     this.step = 0;
     this.dream = 0;
+    this.bgm = true;
 };
 
 let ch = new Dog;
@@ -72,6 +73,7 @@ ch.load = function()
 	Keyboard = new ObjKeyboard();
         Map.load({z:ch.z,map:ch.map});
 	Draw.all();
+        Bgm.run();
         (ch.map == 0) ? Opening() : wandering();
 	return;
     }
@@ -96,7 +98,7 @@ ch.savezone = function() {
 
 ch.save = () => {
     let ret = {};
-    "map,x,y,z,muki,life,lifebox,spice,expr,exprc,jt,dark,invent,score,targetspeed,chattable,lostkey,walldp,tree,warp,done,pick,visited,layout"
+    "map,x,y,z,muki,life,lifebox,spice,expr,exprc,jt,dark,invent,score,targetspeed,chattable,lostkey,walldp,tree,warp,done,pick,visited,layout,bgm"
         .split(",")
         .map(key => { ret[key] = ch[key]; });
     localStorage.setItem("save", JSON.stringify(ret));
@@ -152,7 +154,7 @@ ch.walking = function() {
         ch.fog.walk();
     } else {
         if (Map.kabe(ch.towhere())) {
-            return (new Audio("kabe.mp3")).play();
+            return Bgm.kabe();
         }
         if (ch.muki == ch.fog.north) {
             ch.y--;

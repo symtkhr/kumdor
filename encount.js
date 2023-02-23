@@ -231,6 +231,7 @@ const Encounter = function()
 		$("#enemy .fig img").hide();
 		$("#enemy .fig .egg").show();
 		eggturn = true;
+                Bgm.run("egg");
 		jwait(go_into_battle);
 		return;
 	    }
@@ -255,6 +256,7 @@ const Encounter = function()
             seq.push(... enemy.drop.map(v => {
                 return {t : (16 <= v ? "呪文書" : Items.spec(v).name)
                         + "を拾った。"}}));
+        seq.push(() => Bgm.run());
         Draw.sequence(seq);
     };
 
@@ -301,7 +303,8 @@ const Encounter = function()
         TextBar("魔獣から逃れた。");
         jwait(function() {
             penalty();
-	    if (ch.life <= 0) return GameOver(); 
+	    if (ch.life <= 0) return GameOver();
+            Bgm.run();
             wandering();
             $("#enemy").hide();
         });
@@ -322,6 +325,7 @@ const Encounter = function()
     $("#enemylife").css("width", "100%");
     $(".enemyscript, .rescript, .eggscript").text("");
     $("#enemy").show();
+    Bgm.run("enemy");
     jwait(action);
 };
 

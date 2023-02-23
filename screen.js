@@ -180,6 +180,7 @@ let submenu = function(options, callbacks, type)
 
 // ゲームオーバイベント
 let GameOver = function(message){
+    Bgm.run();
     TextBar(message || "命が尽きた。");
     $("#bg").css("background", "red");
     $(".cell img").css("filter", "hue-rotate(-120deg) contrast(1.5)");
@@ -258,6 +259,7 @@ Draw.dive = (jumpto, isdown) => {
 	    Map.jump(jumpto);
             Draw.outfits();
             Draw.map();
+            Bgm.run();
 	    return wandering();
 	});
 };
@@ -282,6 +284,7 @@ let Opening = function() {
 
     const seq = [
 	{t:"(以降、右下の点滅マークが出たら、\n 'J'を押して進行します)\n"},
+        () => { Bgm.run(); },
 	{t:"惑星クムドールの首都・クミエルに//向かうためにあなたが搭乗した飛行船は、"},
 	{t:"到着直前に突然のシステム異常により//墜落してしまった。"},
 	{func: () => {
@@ -310,6 +313,7 @@ let Opening = function() {
 	    $("#text").show();
 	    Draw.textbox(false);
 	    Map.jump({loc:[19,13], map:2, z:0});
+            Bgm.run("none");
 	}},
 	{d:"なんだ なんだ。", thru:true},
 	{d:"船が墜落したらしい。", thru: true},
@@ -321,6 +325,7 @@ let Opening = function() {
 	{d:"おい、誰かいるぜ。", thru:true},
 	{d:"生きてるのかい?", thru: true},
 	{d:"..........。"},
+        () => { Bgm.run(); },
     ];
 
     TextBar("モードを選択してください。開始時の\n経験値・所持金・ライフが変わります。\n(スペースキーで選択、'J'で決定)");
@@ -416,8 +421,10 @@ let SysOpt = function() {
         Draw.all();
         wandering();
     };
-    let Bgm = function(){
-	TextBar("(本機能は未実装です)");
+    let BgmConfig = function(){
+        ch.bgm = !ch.bgm;
+	TextBar("(BGMを" + (ch.bgm ? "ON" : "OFF") + "にしました)");
+        Bgm.run();
         wandering();
     };
     let Walkthrough = function(){
@@ -458,8 +465,8 @@ let SysOpt = function() {
         }], "layout");
     };
 
-    submenu(["再描画", "キー配列","セーブ消去", //"攻略", "BGM", 
-            ],[Redraw, KeyLayout, Kill, //Walkthrough, Bgm
+    submenu(["BGM", "再描画", "キー配列","セーブ消去", //"攻略", 
+            ],[BgmConfig, Redraw, KeyLayout, Kill, //Walkthrough, 
             ], "system");
 };
 
@@ -519,6 +526,46 @@ let draw_largemap = () => {
 
 
 };
+
+let Bgm = {};
+
+Bgm.run = (param) => {
+    const FILENAME = {
+        enemy: "hibana.mp3",
+        egg: "Electric_Equipment_Connection.mp3",
+        ground: "Certain_Curse.mp3",
+        cave: "Floating_brain.mp3",
+        town: "dangeon.mp3",
+        dp: "bukimi.mp3",
+        open: "frightening_dream.mp3"
+    };
+
+    let key = param || (() => {
+        if (ch.life <= 0) return "none";
+        if (ch.map == 0) return "open";
+        if (ch.map == 5) return "dp";
+        if (ch.map == 1)
+            return ch.x < 64 ? "ground" : "cave";
+        return "town";
+    })();
+
+    if (!ch.bgm) key = "none";
+    if (Bgm.music && !Bgm.music.paused) {
+        if (Bgm.opt == key) return;
+        Bgm.music.pause();
+    }
+    Bgm.opt = key;
+
+    if (key == "none") return;
+    let src = "./sounds/" + FILENAME[key];
+    if (!src) return;
+    Bgm.music = new Audio(src);
+    Bgm.music.volume = .1;
+    Bgm.music.loop = true;
+    Bgm.music.play();
+};
+
+Bgm.kabe = () => (new Audio("./sounds/kabe.mp3")).play();
 
 // Main
 $(function() {
