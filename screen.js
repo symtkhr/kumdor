@@ -1,7 +1,6 @@
 // 汎用関数
 const GetRand = (max) => parseInt(Math.random() * max);
-const inDebug = () => location.hash == "#debugging";
-const CLOG = (...arg) => inDebug() ? console.log(...arg) : {};
+
 Array.prototype.shuffle = function() {
     let array = this;
     //CLOG(array.map(v=>v.name));
@@ -12,7 +11,7 @@ Array.prototype.shuffle = function() {
     return array;
 };
 
-const IMGROW = 16;//(location.hash == "#original") ? 16 : 20;
+const IMGROW = 16;
 const IMGCELL = 32;
 
 let Draw = {};
@@ -63,15 +62,12 @@ Draw.life = function(flg)
 {
     $("#lifecap").width(ch.lifebox * 16);
     $("#life").width((ch.life + 9) / 10);
-    for (let i = 0; i < ch.lifebox; i++) {
-        //DrawLine(8 + i * 16, 321, 8 + i*16, 335, 0xff00ff, true);
-    }
     $("#life").text(parseInt((ch.life + 9) / 10) + "/" + (16 * ch.lifebox) + "pt.");
     if (ch.life <= 50)
        $("#bg").addClass("dying");
     else
        $("#bg").removeClass("dying");
-}
+};
 
 // スパイス・経験値・状態異常の描画
 Draw.status = function() {
@@ -117,11 +113,11 @@ Draw.textbox = function(is_shown)
     return $obj.hide();
 };
 
-const TextBar = function(txt, is_human)
+const TextBar = function(txt)
 {
     let t = ($("#text").text() + txt.split("//").join("\n")).split("\n");
     $("#text").text(t.slice(-3).join("\n") + "\n");
-}
+};
 const Dialog = function(txt, callback)
 {
     if (txt[0] == "\v" || txt[0] == "\f") return TextBar(txt.slice(1)) & (callback || wandering)();
@@ -142,14 +138,7 @@ const Dialog = function(txt, callback)
 	(callback || wandering)();
     }, 10);
 };
-`
-const HyperDialog = (txts) => {
-    if (!Array.isArray(txts)) txts = [txts];
-    let seq = txts.map(s => {return{d:s}});
-    seq[seq.length - 1].thru = true;
-    Draw.sequence(seq);
-};
-`
+
 // メニュー描画
 let submenu = function(options, callbacks, type)
 {
@@ -180,7 +169,7 @@ let submenu = function(options, callbacks, type)
 
 // ゲームオーバイベント
 let GameOver = function(message){
-    Bgm.run();
+    Bgm.run("none");
     TextBar(message || "命が尽きた。");
     $("#bg").css("background", "red");
     $(".cell img").css("filter", "hue-rotate(-120deg) contrast(1.5)");
@@ -198,7 +187,7 @@ let GameOver = function(message){
         $("#gamedisp").append(v);
         //$("#str").append('<div style="display:inline-block;" class="selected"></span>');
     };
-}
+};
 
 Draw.sequence = (txts) => {
     if (!Array.isArray(txts)) txts = [txts];
@@ -337,26 +326,23 @@ let Opening = function() {
 };
 
 let Ending = function() {
-    const jseq = (i) => {
-	if (i < event.length) event[i]();
-	jwait(() => { jseq(i + 1); });
-    };
-    let event = [
-	() => { TextBar("長い戦いに、いきなり終止符が打たれた。"); },
+    let seq = [
+        () => { Bgm.run("none"); },
+	"\v長い戦いに、いきなり終止符が打たれた。",
 	() => { Map.replace(0x6f);
                 $("#map").css("background","#00ff00");
-		TextBar("気が付くと、そこに－//一人の少年が眠っていた。");
-	      },
+              },
+	"\v気が付くと、そこに－//一人の少年が眠っていた。",
 	() => {
 	    ch.z = 0;
             ch.muki = 0;
 	    Map.jump({map:4,loc:[20,109]});
             Map.replace(0xec); // 国王
             Map.replace(0xea, [19,109]); // ミド
-            //Draw.map();
+            Bgm.run("ending");
             Draw.all();
-	    Dialog("よくやった。ホントに ホントによくやった。//クムドール国民全員にかわって//お礼を申し上げたい。", "jwait");
-	},
+        },
+	"よくやった。ホントに ホントによくやった。//クムドール国民全員にかわって//お礼を申し上げたい。",
 	() => {
             $("#gamedisp div").hide();
 	    let $v = $('<div id="str">').css({
@@ -365,10 +351,10 @@ let Ending = function() {
 		width:"100px", height:"100px", color:"black", lineHeight: "100px",
 	    }).text("終");
 	    $("#gamedisp").append($v).css("position","relative");
+            jwait(location.reload); 
 	},
-	() => { location.reload(); },
     ];
-    jseq(0);
+    Draw.sequence(seq);
 };
 
 // j入力待ち
@@ -405,7 +391,7 @@ let wandering_action = function() {
         if (jm == 4) { BigHand.score(); }
         if (jm == 5) { SysOpt(); }
     }}, ]);
-}
+};
 
 let SysOpt = function() {
     let Kill = function(){
@@ -478,7 +464,7 @@ let dumpdebug = () => {
     if (!$("#lmapok").size())
 	$("#debug").after("<input type=checkbox id=lmapok>largemap");
     if ($("#lmapok").prop("checked")) draw_largemap();
-}
+};
 
 let draw_largemap = () => {
     const IMGROW = 16;
@@ -532,12 +518,13 @@ let Bgm = {};
 Bgm.run = (param) => {
     const FILENAME = {
         enemy: "hibana.mp3",
-        egg: "Electric_Equipment_Connection.mp3",
+        egg: "bukimi.mp3",//"Electric_Equipment_Connection.mp3",
         ground: "Certain_Curse.mp3",
         cave: "Floating_brain.mp3",
         town: "dangeon.mp3",
-        dp: "bukimi.mp3",
-        open: "frightening_dream.mp3"
+        dp: "keiteki.mp3",
+        open: "frightening_dream.mp3",
+        ending: "The_Palace.mp3",
     };
 
     let key = param || (() => {
@@ -560,8 +547,8 @@ Bgm.run = (param) => {
     let src = "./sounds/" + FILENAME[key];
     if (!src) return;
     Bgm.music = new Audio(src);
-    Bgm.music.volume = .1;
-    Bgm.music.loop = true;
+    Bgm.music.volume = (key == "dp") ? .5 : .1;
+    Bgm.music.loop = key != "ending";
     Bgm.music.play();
 };
 

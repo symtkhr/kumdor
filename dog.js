@@ -3,7 +3,7 @@ const NOT_FOUND = "特別なものは何もない。";
 
 ///////// 主人公
 let Dog = function() {
-    this.map = 2;
+    this.map = 0;
     this.x = 19;
     this.y = 13;
     this.z = 0;
@@ -37,53 +37,19 @@ let ch = new Dog;
 
 ch.load = function()
 {
-    if (inDebug()) {
-	ch.map = 1;
-	ch.x = 57; // 83=0x53
-	ch.y = 70; // 104=0x68
-        ch.chattable = true;
-	ch.muki = 2;
-	ch.z = 0;
-	ch.lifebox = 8;
-	ch.life = LIFEBOX * ch.lifebox;
-	ch.spice = 9000;
-	ch.expr = 2000;
-	ch.exprc = 5000;
-	ch.invent = [1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 20, 20, 20, 20, 16, 16, 16, 23, 23, 23, 17];
-	ch.targetspeed = 3;
-        ch.score = [[60,10,3],[40,0,4],[30,4,11],[60,0,15],];
-        ch.lostkey = `\\[]':@=-^_+esc`;
-        ch.layout = 101;
-	//ch.lostkey = "";
-	ch.done = ["lang","depth","compass","slipper","weather", "myhome"];
-
-        Keyboard = new ObjKeyboard();
-	Map.load({z:ch.z,map:ch.map});
-	ch.visited = Map.towns.map(v=>v.name);
-	Draw.all();
-	wandering();
-	return;
-    }
-    
-    let save = localStorage.getItem("save");
-    if (save) {
-	let ret = JSON.parse(save);
-	Object.keys(ret).map(key => ch[key] = ret[key]);
-
-	Keyboard = new ObjKeyboard();
-        Map.load({z:ch.z,map:ch.map});
-	Draw.all();
-        Bgm.run();
-        (ch.map == 0) ? Opening() : wandering();
-	return;
+    if (!loadDebug()) {
+        let save = localStorage.getItem("save");
+        if (save) {
+            let ret = JSON.parse(save);
+            Object.keys(ret).map(key => ch[key] = ret[key]);
+        }
     }
 
-    //ch.lifebox = 3;
-    //ch.life = LIFEBOX * ch.lifebox;
-    //ch.spice = 2000;
-    Map.load();
+    Keyboard = new ObjKeyboard();
+    Map.load({z:ch.z,map:ch.map});
     Draw.all();
-    Opening();
+    Bgm.run();
+    (ch.map == 0) ? Opening() : wandering();
 };
 
 ch.savezone = function() {
@@ -314,18 +280,18 @@ ch.hanasu = function()
 				 ((v.sym && !v.loc && v.sym == k) ||
 				  (v.loc && v.loc[0] == to.x && v.loc[1] == to.y)));
         CLOG(json, obj);
-	if (json && (ch.map == 1 || Map.is_talker(ch.map, k))) {
-	    return obj ? {
-		onspoken: obj.onspoken,
-		branch: obj.branch,
-		talk: (json.talk || obj.talk || "").split("|")
-	    }:
-	    { talk: json.talk.split("|") };
-	}
-	return obj || { onspoken: () => { 
+        if (json && (ch.map == 1 || Map.is_talker(ch.map, k))) {
+            return obj ? {
+                onspoken: obj.onspoken,
+                branch: obj.branch,
+                talk: (json.talk || obj.talk || "").split("%s").join("犬神").split("|")
+            }:
+            { talk: json.talk.split("|") };
+        }
+        return obj || { onspoken: () => { 
             TextBar(NOT_FOUND);
             wandering();
-	}};
+        }};
     };
 
     let event = get_speaking_event();
