@@ -1,5 +1,5 @@
 // 呪文返しオブジェクト
-const Jumongaeshi = function(xx, target) {
+const Jumongaeshi = function(target) {
     const TYPE = {
         enemy: 0,
         egg: 1,
@@ -8,8 +8,10 @@ const Jumongaeshi = function(xx, target) {
         tree: 4,
         dream: 5,
     };
+    CLOG(target);
     const type = TYPE[target.type];
     const perline = (type == TYPE.enemy || type == TYPE.egg) ? 14 : 44;
+    const jumonline = parseInt(target.jumon.length / perline);
     const dom = (type == TYPE.enemy || type == TYPE.egg) ? "#enemy" : "#longscript";
     if (type == TYPE.bighand) {
         $("#longscript .kbclose, #speedmeter").show();
@@ -18,28 +20,17 @@ const Jumongaeshi = function(xx, target) {
     }
     else $("#longscript .kbclose, #speedmeter").hide();
     
-    // 指定文字数の呪文を返す
-    const provide_script = function() {
-        const entire = target.jumon;
-        const len = perline * target.jumonline;
-        let from = GetRand(entire.length);
-        from = entire.lastIndexOf(" ", from) + 1;
-        let ret = entire.slice(from, from + len);
-        if (ret.length == len) return ret;
-        return (ret + " " + entire).slice(0, len);
-    };
-
     // 入力開始
     const start = function() {
         let eggrap = 0;
-        let given = provide_script();
+        let given = target.jumon.slice(0, perline * jumonline);
         let typed = "";
 
         $("#jtext").hide();
         $(".enemyscript, .rescript, .eggscript").text("");
         $(dom + " .enemyscript").each(function(row) {
             let n = $(dom + " .enemyscript").size();
-            let i = target.jumonline + row - n;
+            let i = jumonline + row - n;
             if (i < 0) return;
             $(this).text(given.slice(i * perline, (i + 1) * perline));
         });
@@ -62,12 +53,12 @@ const Jumongaeshi = function(xx, target) {
                     eggrap++;
                     $(".eggscript").each(function(row) {
                         let n = $(dom + " .eggscript").size();
-                        let i = target.jumonline + row - n;
+                        let i = jumonline + row - n;
                         if (i < 0) return;
                         $(this).text(given.slice(i * perline, eggrap).slice(0, perline));
                     });
                     //時間切れ
-                    if (eggrap >= perline * target.jumonline) {
+                    if (eggrap >= perline * jumonline) {
                         clearInterval(timer.handler);
                         return target.uchiowari(1);
                     }
@@ -147,11 +138,11 @@ const Jumongaeshi = function(xx, target) {
         });
 
         // cursor
-        $dump.push('<span style="background-color:#fe0">_</span>');
+        $dump.push('<span style="background-color:#fe0">.</span>');
 
         $(dom + " .rescript").each(function(row) {
             let n = $(dom + " .rescript").size();
-            let i = target.jumonline + row - n;
+            let i = jumonline + row - n;
             if (i < 0) return;
             $(this).html($dump.slice(perline * i, perline * (i + 1)).join(""));
         });
@@ -199,12 +190,12 @@ const Encounter = function()
             spellcast.level = 1;
         }
         spellcast.enemy = enemy.id;
+        spellcast.len = 14 * ((27 < enemy.id) ? 2 : 1);
 
         battle.jumon = Spellcast.make(spellcast);
-        battle.jumonline = (27 < enemy.id) ? 2 : 1;
         battle.uchiowari = uchiowari;
 
-        Jumongaeshi(0, battle);
+        Jumongaeshi(battle);
     };
 
     const uchiowari = function(mistype) {
@@ -371,15 +362,14 @@ const ChatTree = function(opt)
 	]);
     };
 
-    var battle = {};
-    battle.jumon = Spellcast.make();
-    battle.jumonline = 3;
+    let battle = {};
+    battle.jumon = Spellcast.make({len: 44 * 3});
     battle.uchiowari = uchiowari;
     battle.escape = escape;
     battle.type = "tree";
     //var timer = setInterval(() => { sec++; }, 100);
     $("#longscript").show();
-    Jumongaeshi(4, battle);
+    Jumongaeshi(battle);
 }
 
 // 呪文壁
@@ -428,9 +418,11 @@ const OpenWall = function(opt)
 	{t:("足が竦み、命が吸い取られてゆく。"), thru:true},
 	{func:() => {
 	    $("#longscript").show();
-            Jumongaeshi(-1, {
-		jumon: Spellcast.make({level: opt.level}),
-		jumonline: (opt.level < 15) ? 2 : 3,
+            Jumongaeshi({
+		jumon: Spellcast.make({
+                    level: opt.level,
+                    len: 44 * ((opt.level < 15) ? 2 : 3),
+                }),
 		uchiowari: uchiowari,
 		type: "wall",
             });
@@ -451,12 +443,11 @@ const DreamPoint = function()
 	return Ending();
     };
     let battle = {};
-    battle.jumon = Spellcast.make();
-    battle.jumonline = 6;
+    battle.jumon = Spellcast.make({len: 6 * 44});
     battle.uchiowari = uchiowari;
     battle.type = "dream";
     $("#longscript").show();
-    Jumongaeshi(null, battle);
+    Jumongaeshi(battle);
 };
 
 

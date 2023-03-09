@@ -658,8 +658,14 @@ table#item {
   <p>
     <input id="keyinput" type="tel" style="ime-mode:inactive; border-radius:50%; font-size:1px; width:2px; height:3px; line-height:15px; color:black; background-color:black; border:none;"/>
     FとJのところに両手の人差し指を置いてください。
-    「F」で歩行、「J」でメニュー選択、「スペース」で方向切替です。
+    「F」で歩行、「スペース」で方向切替です。
+    <br/>
+    (右側のメニューは「J」と「スペース」で選択します)
     <span id="debug" style="font-family:monospace;"></span>
+    <div style="display:none;">
+    <label><input type="checkbox" checked id="tutor" />チュートリアルあり</label>
+    <div id="tutorial" style="background:#eee; height:20px; width:500px; border:gray 1px solid; padding:3px;"></div>
+    </div>
   </p>
   <hr>
   

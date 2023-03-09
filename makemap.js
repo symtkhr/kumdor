@@ -237,8 +237,9 @@ Map.record_talk = (id, count) => {
 
 Map.itembox = function(replacer, item_id)
 {
-    let id = item_id || [1,2,3,4,8,9,10,11,12][GetRand(9)];
-    let name = Items.spec(id).name;
+    let id = item_id ||
+        (ch.isdone("loop") ? (16 + GetRand(9)) : [16,17,18,19,21,22,24][GetRand(7)]);
+    let name = id < 16 ? Items.spec(id).name : "呪文書";
     let seq = [
 	{t:"ヒトデ型の箱を開けると、中から\n" + name + "が出てきた。拾いますか?",
 	 confirm:true},
@@ -542,8 +543,9 @@ const event_outmap = () => {
         {sym:0xb3, onspoken: () => ch.pickup("水深計",   null, 0x31, () => ch.setdone("depth"))},
         {sym:0xb9, onspoken: () => ch.pickup("変わった形の水晶", "水晶の磁石", 0xa2, () => ch.setdone("compass"))},
         {sym:0xc0, onspoken: () => { Map.itembox(0x11); }},
-        {sym:0xc1, onspoken: () => { Map.itembox(0x20); }},
-        {sym:0xc2, onspoken: () => { Map.itembox(0x05); }},
+        {sym:0xc1, loc:[88,88], onspoken: () => { Map.itembox(0x20, 8); }},
+        {sym:0xc1, loc:[77,90], onspoken: () => { Map.itembox(0x20, 4); }},
+        {sym:0xc2, onspoken: () => { Map.itembox(0x05, 1); }},
     ];
 
     // ch記録によるマップの書き換え

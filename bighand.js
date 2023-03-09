@@ -309,13 +309,12 @@ BigHand.practice = function(level) {
     const go_into_practice = function() {
         $("#longscript").show();
         let battle = {
-            jumon: Spellcast.make({level:level}),
-            jumonline: 2,
+            jumon: Spellcast.make({level:level, len:44 * 2}),
             uchiowari: uchiowari,
             type: "bighand",
 	    escape: escape,
         }
-        Jumongaeshi(2, battle);
+        Jumongaeshi(battle);
         timer.sec = 0;
         timer.handler = setInterval(() => {
             timer.sec++;
