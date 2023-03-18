@@ -225,6 +225,7 @@ ch.diving = function(is_down)
     // kinen: 16.44 - 20.46 ==>  29.61 - 33.63
     let delta = (x, y, z) => {
 	if (m == 4) return {x:29-16, y:61-44};
+        if (x == 58 && y == 73) return;
         let is_rtyu = (x < 45 || 105 < x);
         let dx = (1 < z) ?  0 : (is_rtyu ? 80 : 39);
         let dy = (1 < z) ? 16 : (is_rtyu ? -67 : -72);
@@ -235,6 +236,8 @@ ch.diving = function(is_down)
         if (!is_waterfront(ch)) return kabe();
 
         let d = delta(ch.x, ch.y, ch.z + 1);
+        if (!d) return TextBar("水が噴き上げてくるので、潜れない。");
+
 	let to = {x:(ch.x + d.x), y:(ch.y + d.y)};
 	if ((m == 4) && (Map.kabe(to) || Map.symbol(to) == 1)) return kabe();
 	if (ch.z == 0) ch.record_jump({});

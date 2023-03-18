@@ -40,6 +40,8 @@ Draw.map = function() {
             .css("left", ((k % IMGROW) * -IMGCELL) + "px")
             .css("top",  ((graph * 7 + parseInt(k / IMGROW)) * -IMGCELL) + "px");
     });
+    const inwater = (sym) => (sym == 5 || sym == 6 || sym == 7);
+    $("#me img").css("top", inwater(Map.symbol(ch)) ? "10px" : "0px");
 
     $("#map").css("background",
 		  ch.dark ? "black" :
@@ -53,7 +55,6 @@ Draw.me = function() {
     let n = ch.muki * 2 + (ch.fog.enable ? ch.fog.foot() : ((ch.x + ch.y) % 2));
     $("#me").show().children("img")
         .css("position", "relative")
-        .css("top", "0px")
         .css("left",  (n * -IMGCELL) + "px");
 };
 

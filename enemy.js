@@ -113,40 +113,44 @@ const inhabitation = `
 00000000000000000000000000000000:f
 `.split("\n").map(row=>row.split(":").shift()).filter(v=>v);
 
+const enemy_habitat = () => {
+    if (ch.map == 1) {
+        let stager = inhabitation[parseInt(ch.y/4)][parseInt(ch.x/4)];
+        if (stager == "*") return;
+        //(0)nADF(4)JKL(7);+(9)RYU(12)GQ(14)I@X(17)C/(19)VM7(22)10(24)-[*
+        return [[0,9], [7,14], [12,17], [14,21], [17,24], [19,27]][stager % 6];
+    }
+    let floor = 3 * parseInt(ch.x / 40) + parseInt(ch.y / 40);
+    if (floor < 6)
+        //(27)ひぼせかう(32)もおいり
+        return [[27,31], [27,32], [27,33], [29,34], [29,35], [29,36]][floor % 6];
+    return [0,0];
+};
+
 let Enemy = {};
 Enemy.make = (opt) => {
-    let stager = ch.map == 5 ? (parseInt(ch.x / 40) + 6) : inhabitation[parseInt(ch.y/4)][parseInt(ch.x/4)]; //3 * ((ch.x < 40) ? 0 : 1) + parseInt(ch.y / 40);
-    CLOG("enemy.stager=",stager);
-    if (stager=="*") return;
-    if (!opt || !opt.stage) opt = {stage: stager};
-    const stage = [0, 4, 7, 9, 12, 14, 17, 21, 24, 27, 32];
-    const stage1 = [9, 14, 17, 21, 24, 27, 32, enemylist.length, 0];
-    const stage0 = [0,  7, 12, 14, 17, 19, 27, 27, 0];
-    const from = stage0[opt.stage];
-    CLOG("enemy.id.range=", stage0[opt.stage], stage1[opt.stage]);
-    //(0)nADF(4)JKL;(7);+(9)RYU(12)GQ(14)I@X(17)C/(19)VM7(22)10(24)-[*(27)ひぼせかう(32)もおいり
-    const subset = enemylist.slice(stage0[opt.stage], stage1[opt.stage]);
+    if (!opt || !opt.inhabit) opt = {inhabit: enemy_habitat() };
+    if (!opt.inhabit) return;
+
+    const from = opt.inhabit[0];
+    CLOG("enemy.id.range=", opt.inhabit);
+    const subset = enemylist.slice(from, opt.inhabit[1]);
     const id = GetRand(subset.length) + from;
+
     let enemy = {};
-    Object.assign(enemy, enemylist[id]);
+    Object.assign(enemy, enemylist[id] || enemylist[0]);
     enemy.id = id + 1;
     enemy.exp += GetRand(enemy.exp / 2);
     enemy.spc += GetRand(enemy.spc / 2);
     enemy.penalty = GetRand(enemy.pena[2]) < enemy.pena[3] ? enemy.pena[0] : 0;
     if (enemy.penalty == 1) enemy.bite = GetRand(enemy.pena[4] || 0) + enemy.pena[5];
+
     enemy.drop = enemy.drop.map(v => {
         if (GetRand(v.rate)) return;
         if (0x10 == v.item) return 16 + GetRand(9);
         return v.item;
     }).filter(v => v);
 
-    let ITEM_C = {
-        0x01 : "g",0x02 : "m",0x03 : "c",
-        0x04 : "onigiri",0x05 : "tsukuda", 0x06 : "s",
-        0x07 : "pig", 0x08 : "cheese",0x09 : "air",
-        0x0a : "niboshi",0x0b : "nuts", 0x21 : "k",
-    };
-    //CLOG("enemy.drop=", enemy.drop);
     return enemy;
 };
 

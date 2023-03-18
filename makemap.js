@@ -239,14 +239,20 @@ Map.itembox = function(replacer, item_id)
 {
     let id = item_id ||
         (ch.isdone("loop") ? (16 + GetRand(9)) : [16,17,18,19,21,22,24][GetRand(7)]);
-    let name = id < 16 ? Items.spec(id).name : "呪文書";
+    let name = id < 0 ? "スパイス" : (id < 16 ? Items.spec(id).name : "呪文書");
     let seq = [
 	{t:"ヒトデ型の箱を開けると、中から\n" + name + "が出てきた。拾いますか?",
 	 confirm:true},
 	{func:
          () => {
-	     if (!Shojihin.add([id])) {
-		 return TextBar("荷物がいっぱいで拾えない。");
+             if (id < 0) {
+                 let spice = GetRand(200);
+                 spice += (ch.isdone("myhome") || (1000 < ch.spice)) ? 100 : (1100 - ch.spice);
+                 name = spice + name;
+                 ch.spice += spice;
+                 Draw.status();
+             } else if (!Shojihin.add([id])) {
+                 return TextBar("荷物がいっぱいで拾えない。");
 	     }
 	     TextBar(name + "を拾った。");
 	     Map.replace(replacer);
@@ -394,6 +400,7 @@ const event_outmap = () => {
     ret.across = [];
     ret.retalk = [];
     ret.enemy = true;
+    ret.base = 0x99;
     ret.make_bed = () => {};
 
     let footlist = [
@@ -425,7 +432,6 @@ const event_outmap = () => {
         {sym:0x1c, loc:[43,58], onstep: () => {
             Draw.sequence([
                 "\v飲み込まれた。",
-                //Todo: (DP転落イベント)
                 () => { 
                     $("#gamedisp").css("background", "black");
 	            $("#text").show();
@@ -435,6 +441,7 @@ const event_outmap = () => {
                 },
                 "ド \t リ \t ー \t ム \t ポ \t イ \t ン \t ト。",
                 "あいたたたたた。\n\t誰だい人のアタマを踏んづけるのは。",
+                "私をベッドか何かと勘違いしているのかね。",
                 () => {
 	            $("#gamedisp").css("background", "");
                     Draw.textbox(true);
@@ -457,7 +464,7 @@ const event_outmap = () => {
         }},
         // 水流
         {loc:[91,72], onstep: () => {
-            TextBar("激しい水流に巻き込まれた。");
+            TextBar("激しい水流に噴き上げられた。");
             ch.record_jump();
             jwait(() => {
                 if (ch.lostkey.indexOf("+esc") != -1) return GameOver();
@@ -466,6 +473,7 @@ const event_outmap = () => {
             });
         }},
         {loc:[60,73], onstep: () => {
+            TextBar("激しい水流に巻き込まれた。");
             ch.record_jump({});
             jwait(() => { Map.jump({sym:0x30, loc:[97, 71], z: 5}); wandering(); });
         }}, 
@@ -529,9 +537,9 @@ const event_outmap = () => {
         }},
         
         // チャトフィッシュとチャット
-        {sym: 0xea, onspoken: () => { Dialog("クム クム クム"); }},
-        {sym: 0xe9, onspoken: () => { Dialog("異変の時にみんなで//エスケープしてきたんだよ。"); }},
-        {sym: 0xe8, onspoken: () => { Dialog("そこの村の人はみんな避難しちゃったみたい。"); }},
+        //{sym: 0xea, talk:["クム クム クム"]},
+        //{sym: 0xe9, talk:["異変の時にみんなで\nエスケープしてきたんだよ。"]},
+        //{sym: 0xe8, talk:["そこの村の人はみんな避難しちゃったみたい。"]},
 
         //拾得イベント
         {sym:0xba, loc:[39,93], onspoken: () => Keyboard.pick("SHIFT", 0x11) },
@@ -545,7 +553,8 @@ const event_outmap = () => {
         {sym:0xc0, onspoken: () => { Map.itembox(0x11); }},
         {sym:0xc1, loc:[88,88], onspoken: () => { Map.itembox(0x20, 8); }},
         {sym:0xc1, loc:[77,90], onspoken: () => { Map.itembox(0x20, 4); }},
-        {sym:0xc2, onspoken: () => { Map.itembox(0x05, 1); }},
+        {sym:0xc2, loc:[112,28], onspoken: () => { Map.itembox(0x31, 1); }},
+        {sym:0xc2, onspoken: () => { Map.itembox(0x05, -1); }},
     ];
 
     // ch記録によるマップの書き換え
@@ -1067,9 +1076,10 @@ const event_town4map = () => {
     let footlist = [
         // 扉
         {sym:0x15, loc:[9,23],  jump:{sym:1,stepin:1,loc:[150/2,53]}},      // tax
-        {sym:0x16, loc:[16,24], jump:{sym:1,stepin:1,loc:[58,123]}},        // market
-        {sym:0x16, loc:[14,20], jump:{sym:1,stepin:1,loc:[(233-5)/2,100]}}, // home
-        {sym:0x17, loc:[31,24], jump:{sym:1,stepin:1,loc:[(233-5)/2,71]}},  // labo
+        {sym:0x16, loc:[16,24], jump:{sym:1,stepin:1,loc:[58,123]}},  // market
+        {sym:0x16, loc:[14,20], jump:{sym:1,stepin:1,loc:[114,100]}}, // home
+        {loc: [114,100], jump:{loc:[14,21]}, onstep: () => ch.isdone("myhome") ? true : ch.remand() },
+        {sym:0x17, loc:[31,24], jump:{sym:1,stepin:1,loc:[114,71]}},  // labo
         {"sym":21,"loc":[14,13],jump:{sym:1,stepin:1,loc:[69,97]},},  //124bil
         {"sym":23,"loc":[25,23],jump:{sym:1,stepin:1,loc:[52,94]},},  //hotel
         {"sym":22,"loc":[32,13],jump:{sym:1,stepin:1,loc:[108,123]}}, //gym
@@ -1285,7 +1295,7 @@ const event_town4map = () => {
                 if (Items.has("memo")) return talks[13];
                 return (Items.add(["memo"])) ? talks[12] : talks[15];
             }
-            return talks[15];
+            return talks[14];
         }},
         // 博士助手
         {loc:[15,66], branch: (talk) => ch.warp.length ? talk[1] : talk[0]},
@@ -1325,7 +1335,13 @@ const event_dreampoint = (map) => {
     ret.jumper = [1, 0x21, 0x29, 0x2a] // ワ㊦㊤
     ret.across = [];
     ret.enemy = true;
-    ret.make_bed = () => {};
+    ret.base = 0;
+    ret.make_bed = () => {
+        let sym = Map.symbol(ch.towhere());
+        if (sym < 0xe8 || 0xec <= sym) return false;
+        Map.replace(0x67);
+        return true;
+    };
 
     let footlist =  [
         {sym:0xb6, onstep: () => { GameOver("アブクに取り込まれてしまった。"); }},
@@ -1367,7 +1383,17 @@ const event_dreampoint = (map) => {
             let jumpto = {sym:0x2a, loc:[ch.x + (y < 120 ? 0 : 40), y % 120]};
             Draw.stair(jumpto, true);
         }},
-
+        {sym:0x67, onstep: () => { // ベッド
+            Draw.sequence([
+                {t:"ベッドに入りますか?", confirm:true},
+                () => { ch.sleep(); Map.replace(0x20, [ch.x,ch.y]); },
+                {wait: true},
+            ]);
+        }},
+        {sym:0x40, onstep: () => { // 踏める泡
+            Map.replace(0x20, [ch.x, ch.y]);
+            return true;
+        }},
     ].concat(Map.warps);
 
     ret.FootEvents = interact_footevents(footlist, ret.jumper);

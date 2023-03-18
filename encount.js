@@ -436,14 +436,19 @@ const OpenWall = function(opt)
 // 最地下
 const DreamPoint = function()
 {
-    let uchiowari = function(mistype, speed) {
+    const LEN = 6 * 44;
+    let uchiowari = function(mistype, sec) {
         $("#longscript").hide();
-	ch.dream++;
-	if (ch.dream < 3) return wandering();
-	return Ending();
+        let misrate = Math.round(100 * mistype / LEN);
+        let speed = (misrate > 20) ? 0 : Math.round(LEN * 600 / 5 / sec / 3 * ch.targetspeed);
+        if ((speed < ch.targetspeed * 10) || (20 < misrate)) return wandering();
+        ch.dream++;
+        let seq = Array(4).fill({func: () => $("#bgdam").toggle(), timer: 50});
+        if (3 <= ch.dream) seq.push(() => Ending(), {wait: true});
+        Draw.sequence(seq);
     };
     let battle = {};
-    battle.jumon = Spellcast.make({len: 6 * 44});
+    battle.jumon = Spellcast.make({len: LEN});
     battle.uchiowari = uchiowari;
     battle.type = "dream";
     $("#longscript").show();
