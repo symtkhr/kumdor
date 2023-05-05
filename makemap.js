@@ -460,6 +460,16 @@ const event_outmap = () => {
         }},
         {sym:0x1c, onstep: () => {
             ch.damage(ch.isdone("slipper") ? 20 : 160, true);
+            if (ch.map == 1 && 40 <= ch.x && ch.x <= 46) {
+                let dv = [];
+                if (ch.x - 43 < 0) dv.push(1); //右
+                if (ch.x - 43 > 0) dv.push(3); //左
+                if (ch.y - 58 < 0) dv.push(2); //下
+                if (ch.y - 58 > 0) dv.push(0); //上
+                CLOG(dv);
+                ch.fog.north = dv[GetRand(dv.length)];
+                Draw.outfits();
+            }
             return true;
         }},
         // 水流
@@ -529,9 +539,9 @@ const event_outmap = () => {
             let branch = () => {
                 if (!ch.isdone("loop")) return talks[0];
                 if (ch.lostkey.indexOf("+esc") != -1) return talks[1];
-                if (ch.warp.length == 0) return talks[2];
-                if (ch.dream == 0) return talks[3 + GetRand(4)];
-                return talks[7];
+                if (ch.warp.length == 0) return talks[2 + GetRand(2)];
+                if (ch.dream == 0) return talks[4 + GetRand(4)];
+                return talks[8];
             };
             Map.rocktree([branch()]);
         }},

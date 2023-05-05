@@ -122,12 +122,13 @@ ch.walking = function() {
         if (Map.kabe(ch.towhere())) {
             return Bgm.kabe();
         }
-        if (ch.muki == ch.fog.north) {
+        if (Map.in_fog(ch.map, ch.x, ch.y) && (ch.muki == ch.fog.north)) {
             ch.y--;
             ch.step++; //上 
         } else {
             ch.step = 0;
-            if (ch.muki == 1) ch.x++; //右
+            if (ch.muki == 0) ch.y--; //上
+            else if (ch.muki == 1) ch.x++; //右
             else if (ch.muki == 2) ch.y++; //下
             else if (ch.muki == 3) ch.x--; //左
         }
