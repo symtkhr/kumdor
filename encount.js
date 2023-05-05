@@ -79,6 +79,7 @@ const Jumongaeshi = function(target) {
 
         keytype([{c:"any", ontype:(c) => {
             if (c.length == 1) {
+                c = Keyboard.tokana(c);
                 typed += c;
             }
             let mistype = dump_rescript(given, typed);
@@ -87,7 +88,7 @@ const Jumongaeshi = function(target) {
 		// 大きな手にミスタイプffff入力で中断
 		let t0 = typed.slice(-4);
 		let g0 = given.slice(typed.length - 4, typed.length);
-		if (t0.toLowerCase() == "ffff" && g0.split("").every((c,i) => c != t0[i])) {
+		if (t0.toLowerCase() == Keyboard.tokana("ffff") && g0.split("").every((c,i) => c != t0[i])) {
 		    clearInterval(timer.handler);
 		    return target.escape();
                 }

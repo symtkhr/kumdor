@@ -12,9 +12,9 @@
 <script type="text/javascript" src="bighand.js"></script>
 <script type="text/javascript" src="enemy.js"></script>
 <script type="text/javascript" src="encount.js"></script>
-<script type="text/javascript" src="spellcast.js"></script>
+<script type="text/javascript" src="spellcast.ja.js"></script>
 <script type="text/javascript" src="debug.js"></script>
-<title>クム犬</title>
+<title>カナ犬</title>
 <style>
 body {
    font-size:12pt;
@@ -214,6 +214,7 @@ table#item {
     border:solid 1px #0f0; color:#0f0;
     line-height:20px; font-size:16px;
     padding: 5px; box-sizing:border-box;
+    white-space: nowrap;
 }
 #myscript { white-space:pre; margin-left:5px; font-family:monospace; }
 
@@ -510,7 +511,7 @@ table#item {
     </div>
 
     <div id="longscript">
-      <div style="font-family:monospace; color:white; margin: 2px;" class="kbclose">(ffff=中止)</div>
+      <div style="font-family:monospace; color:white; margin: 2px;" class="kbclose">(ﾊﾊﾊﾊ=中止)</div>
       <div style="font-family:monospace; color:#0f0; margin: 20px 2px; text-align:right;"
            id="speedmeter">
         <div id="" style="width:100%; background:green; height:10px; overflow:hidden;">
@@ -534,7 +535,7 @@ table#item {
 
 
     <div id="keyboard">
-      <span><b>KEYBOARD</b> <span style="font-family:monospace;" id="kbclose">(ffff=終了)</span></span>
+      <span><b>KEYBOARD</b> <span style="font-family:monospace;" id="kbclose">(ﾊﾊﾊﾊ=終了)</span></span>
       <div style="position:absolute; top:19px; left:82px;">
         <div class="keyrow">
           <div class="key">Esc</div>
@@ -586,7 +587,7 @@ table#item {
     </div>
 
     <div id="score">
-      <span><b>SCORE</b> (f=終了)</span>
+      <span><b>SCORE</b> (ﾊ=終了)</span>
       <div id="graph">
         <svg width="480" height="210">
           <path id="linegraph"
@@ -622,13 +623,13 @@ table#item {
     </div>
 
     <div id="scriptbook">
-      <div>呪文を唱える (f=中止)</div>
+      <div>呪文を唱える (ﾊ=中止)</div>
       <div id="myscript"></div>
     </div>
 
     <div id="inventory">
       <span>
-        <b>INVENTORY</b> (f=終了)(Shift+SPACE=逆走)
+        <b>INVENTORY</b> (ﾊ=終了)(Shift+SPACE=逆走)
       </span>
       <div id="inventory_menu">
         <div class="menuoption">終了</div>

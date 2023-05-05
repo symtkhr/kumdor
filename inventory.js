@@ -28,6 +28,12 @@ let Item = function()
         {name:"◆SPARE"},
         {name:"◆TAIRYOKU",life:[65,95],},
     ];
+    if (isKana()) {
+        "ｱｶﾘ/ﾀﾞｯｼｭﾂ/ｺｳｹﾞｷ/ﾍﾞｯﾄﾞ/ﾏﾁ/ﾅｵｽ/ﾆｹﾞﾙ/ｽﾍﾟｱ/ﾀｲﾘｮｸ"
+            .split("/")
+            .forEach((name, i) => ITEMS[i + 16].name = "◆" + name);
+    }
+
     // "kgmcs" -> {name,price}
     this.spec = function(id) {
 	if (!Array.isArray(id)) return ITEMS[id];
@@ -436,7 +442,7 @@ const Jumonsho = function(callback)
     }, {
         c:"any", ontype: (c) => {
             if (10 <= myscript.length) return;
-            myscript += c;
+            myscript += Keyboard.tokana(c);
             dump_myscript();
         }
     }, {

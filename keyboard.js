@@ -46,6 +46,8 @@ let KeyShop = function(param) {
 };
 
 
+const isKana = () => location.pathname.indexOf("kanador") != -1;
+
 let ObjKeyboard = function() {
 
     const KEYALIGN109 =
@@ -62,13 +64,26 @@ let ObjKeyboard = function() {
           ".zxcvbnm<>?_...." +
           ".. ..";
 
+    const KEYALIGN109K =
+          "*ﾇﾌｱｳｴｵﾔﾕﾖﾜﾎﾍｰ**" +
+          "*ﾀﾃｲｽｶﾝﾅﾆﾗｾﾞﾟ***" +
+          "*ﾁﾄｼﾊｷｸﾏﾉﾘﾚｹﾑ***" +
+          "*ﾂｻｿﾋｺﾐﾓﾈﾙﾒﾛ****" +
+          "** **";
+    
+    const KEYALIGN109K_S =
+          "*ﾇﾌｧｩｪｫｬｭｮｦﾎﾍｰ**" +
+          "*ﾀﾃｨｽｶﾝﾅﾆﾗｾﾞ｢***" +
+          "*ﾁﾄｼﾊｷｸﾏﾉﾘﾚｹ｣***" +
+          "*ｯｻｿﾋｺﾐﾓ､｡･ﾛ****" +
+          "** **";
     const KEYALIGN101 =
           "`1234567890-=***" +
           "*QWERTYUIOP[]\\**" +
           "*ASDFGHJKL;'****" +
           "*ZXCVBNM,./*****" +
           "** **";
-    
+
     const KEYALIGN101_S =
           "~!@#$%^&*()_+..."+
           ".qwertyuiop{}|.." +
@@ -89,7 +104,7 @@ let ObjKeyboard = function() {
           "377799998883****" +
           "  2  ";
 
-    let layout = ch.layout;
+    let layout = isKana() ? 109 : ch.layout;
     const KEYALIGN = (layout == 101) ? KEYALIGN101 : KEYALIGN109;
     const KEYALIGN_S = (layout == 101) ? KEYALIGN101_S : KEYALIGN109_S;
     const KEYLEVEL = (layout == 101) ? KEYLEVEL101 : KEYLEVEL109;
@@ -132,10 +147,10 @@ let ObjKeyboard = function() {
         $(".keyrow").each(function(row) {
             $(this).find(".key").each(function(i) {
                 let pos = 0x10 * row + i;
-                let c = KEYALIGN[pos];
+                let c = isKana() ? KEYALIGN109K[pos] : KEYALIGN[pos];
                 if (c == "*") return;
                 $(this).text(c);
-                let cx = KEYALIGN_S[pos];
+                let cx = isKana() ? KEYALIGN109K_S[pos] : KEYALIGN_S[pos];
                 if (cx.toUpperCase() == c || cx == ".") return;
                 $(this).html("<span>" + c + "</span><span>" + cx + "</span>");
             });
@@ -190,7 +205,7 @@ let ObjKeyboard = function() {
                     $("#lecture").text(txt.slice(0,-1));
                 else {
                     if (c == "Enter") c = "\n";
-	            $("#lecture").text(txt + c);
+	            $("#lecture").text(txt + this.tokana(c));
                 }
                 $("#lecture").append($cursor);
             };
@@ -330,6 +345,19 @@ let ObjKeyboard = function() {
         if (ch.lostkey.indexOf(c) != -1) return false;
         ch.lostkey += c;
         return true;
+    };
+
+    // 入力された英数字のかな化
+    this.tokana = (s) => {
+        if (!isKana()) return s;
+        return s.split("").map(c => {
+            let index = KEYALIGN109.toLowerCase().indexOf(c);
+            if (0 <= index) return KEYALIGN109K[index];
+            index = KEYALIGN109_S.toUpperCase().indexOf(c);
+            if (0 <= index) return KEYALIGN109K_S[index];
+            return c;
+        }).join("");
+
     };
 };
 let Keyboard = new ObjKeyboard();
@@ -480,5 +508,4 @@ var keywait0 = function(callback, s, keycodes) {
         callback();
         return;
     });
-}
-
+};
