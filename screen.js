@@ -396,11 +396,16 @@ let wandering_action = function() {
 
 let SysOpt = function() {
     let Kill = function(){
-	TextBar("セーブデータを消去しますか?");
+        TextBar("セーブデータを消去しますか?");
         submenu(["Yes", "No"], [() => {
             localStorage.removeItem("save");
             location.reload();
         }]);
+    };
+    let SaveFile = function(){
+        submenu(["File出力", "削除"], [() => {
+            Draw.filesave(); wandering();
+        }, Kill], "savefile");
     };
     let Redraw = function(){
         Draw.textbox(true);
@@ -452,8 +457,8 @@ let SysOpt = function() {
         }], "layout");
     };
 
-    submenu(["BGM", "再描画", "キー配列","セーブ消去", //"攻略", 
-            ],[BgmConfig, Redraw, KeyLayout, Kill, //Walkthrough, 
+    submenu(["BGM", "再描画", "キー配列","セーブ管理", //"攻略", 
+            ],[BgmConfig, Redraw, KeyLayout, SaveFile, //Walkthrough, 
             ], "system");
 };
 
@@ -555,6 +560,65 @@ Bgm.run = (param) => {
 
 Bgm.kabe = () => (new Audio("./sounds/kabe.mp3")).play();
 
+Draw.filehandler = () => {
+    const sha256 = async (text) => {
+        const uint8  = new TextEncoder().encode(text)
+        const digest = await crypto.subtle.digest('SHA-256', uint8)
+        return Array.from(new Uint8Array(digest)).map(v => v.toString(16).padStart(2,'0')).join('')
+    };
+    Draw.filesave = async function(){
+        let save = localStorage.getItem("save");
+        if (!save) return;
+        let save0 = JSON.parse(save);
+        await sha256(save).then(hash => { save0.hash = hash; });
+        let blob = new Blob(JSON.stringify(save0).split(""), {type:"text/plan"});
+        let $link = document.createElement('a');
+        $link.href = URL.createObjectURL(blob);
+        $link.download = 'savekumdor.dat';
+        $link.click();
+    };
+
+    const uploader = {
+        "dragover" : (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = e.dataTransfer.types.indexOf("Files") < 0 ? "none" : "copy";
+        },
+
+        "drop": (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (localStorage.getItem("save")) {
+                return TextBar("[Load Error] 既存のセーブがあります。");
+            }
+
+            const loaderr = () => TextBar("[Load Error] 無効なファイルです。");
+            const files = e.dataTransfer.files;
+            let fd = new FileReader();
+            fd.readAsText(files[0], 'UTF-8');
+            fd.onload = () => {
+                let save0;
+                try {
+                    save0 = JSON.parse(fd.result);
+                } catch (error) {
+                    console.log(error);
+                    return loaderr(); 
+                }
+                let hash0 = save0.hash;
+                save0.hash = undefined;
+                let json = JSON.stringify(save0);
+                sha256(json).then(hash => {
+                    if (hash != hash0) { console.log(hash0, hash); return loaderr(); }
+                    localStorage.setItem("save", json);
+                    location.reload();
+                });
+            }
+        }
+    };
+    Object.keys(uploader).forEach(e => document.body.addEventListener(e, uploader[e]));
+};
+    
+
 // Main
 $(function() {
     const PNGPATH = "fig/kumtop.png";
@@ -568,5 +632,7 @@ $(function() {
     });
     $("#text").css("white-space", "pre-wrap");
 
+    Draw.filehandler();
     load_original_map();
+
 });
