@@ -1044,7 +1044,7 @@ const event_town3map = () => {
                 ch.setdone("grandsleep");
                 return talks.slice(3,6);
             }
-            return talks[6];
+            return ch.isdone("mido") ? talks.slice(7) : talks[6];
         },
          talk:[
              "みんなミドは死んじゃったなんていうんです。//えっ、あなたがあの有名な?//ミドがここにいればねえ。",
@@ -1067,7 +1067,7 @@ const event_town3map = () => {
 
     // マップ差し替え
     if (ch.isdone("weather")) Map.replace(0x18, [107,14]);
-
+    if (ch.isdone("mido")) Map.replace(0xed, [76,77]);
     return ret;
 };
 
@@ -1252,6 +1252,30 @@ const event_town4map = () => {
              "今 隣で会議中なんだが、\nぜひ顔出ししてやってください。\nおーい開けてやんなさい。",
              "うーむこの本は面白い。",
          ]},
+        // 国王異変明け
+        {loc:[20,108], onspoken: (t) => {
+            if (ch.targetspeed == 3) return Draw.sequence(t.slice(0,3));
+            let seq = t.filter(t => true);
+            seq[8] = {confirm: true, cancel:() => { Dialog(t[8]); }},
+            seq.splice(1,2);
+            seq.splice(1,0, () => {
+                Map.replace(0xec, [19,108]); // 女王ec/e0/ed
+                Map.replace(0xe1, [20,108]); // 国王e1/eb
+                Draw.map();
+            });
+            seq.splice(4,0, () => {
+                Map.replace(0xeb, [20,108]); // 国王
+                Map.replace(0x20, [19,108]); // 女王
+                Map.replace(0xed, [15,108]); // 女王
+                Draw.map();
+            });
+            seq.splice(10,0, () => {
+                Map.replace(0xe0, [19,108]); // 女王
+                Map.replace(0x20, [15,108]); // 女王
+                Draw.map();
+            });
+            Draw.sequence(seq);
+        }},
         // 会議室門番
         {loc:[22,107], branch: ch.isdone("queenmeet") ? (talks => talks[2]) :
          (talks) => ((ch.isdone("kingopen")) ? talks[1] : talks[0])
@@ -1272,6 +1296,7 @@ const event_town4map = () => {
         },
         // 王女
         {loc:[30,91], branch: (talk) => {
+            if (ch.isdone("mido")) return talk.slice(5);
             if (ch.isdone("princess")) return talk[4]; // "早く助けに行ってあげて。//私これから、眠らなきゃ。"
             if (ch.warp.find(v=> v.join(",")==="4,35,83")) {
                 ch.setdone("princess");
@@ -1334,6 +1359,12 @@ const event_town4map = () => {
         Map.replace(0xe0, [23,84]);
         [[31,103],[32,103],[30,103],[33,106],[33,108],[29,110],[31,110],
          [27,106],[27,107]].map(p=> Map.replace(0x2d, p));
+    }
+    if (ch.isdone("mido")) {
+        Map.replace(0xeb, [20,108]); // 国王
+        Map.replace(0xe0, [19,108]); // 女王
+        Map.replace(0xea, [19,109]); // ミド
+        Map.replace(0xe9, [29,90]); // ミド
     }
     return ret;
 };
@@ -1421,6 +1452,7 @@ const event_dreampoint = (map) => {
             return {sym: (i+0x80+0x68), talk:text };
         })
     );
+    Map.replace(0xeb, [59,117]); 
     ret.is_front_of_doors = () => {
         if (Map.symbol(ch.towhere()) != 0xac) return;
         Map.replace(0x2b);
@@ -1440,7 +1472,6 @@ const event_dreampoint = (map) => {
             if (Map.symbol(p) == 0x2b && !clear) Map.replace(0xad, [p.x, p.y]);
         });
     }); 
-    
     return ret;
 };
 

@@ -114,10 +114,11 @@ Draw.textbox = function(is_shown)
     return $obj.hide();
 };
 
+Draw.barline = 3;
 const TextBar = function(txt)
 {
     let t = ($("#text").text() + txt.split("//").join("\n")).split("\n");
-    $("#text").text(t.slice(-3).join("\n") + "\n");
+    $("#text").text(t.slice(-Draw.barline).join("\n") + "\n");
 };
 const Dialog = function(txt, callback)
 {
@@ -131,7 +132,7 @@ const Dialog = function(txt, callback)
 	w = 0;
         if (("\t\f\v").indexOf(t[i]) < 0) $("#text").append(t[i]);
         i++;
-        $("#text").text($("#text").text().split("\n").slice(-3).join("\n"));
+        $("#text").text($("#text").text().split("\n").slice(-Draw.barline).join("\n"));
         if (i < t.length) return;
         clearInterval(timer);
         $("#text").append("\n");
@@ -326,36 +327,82 @@ let Opening = function() {
     ]);
 };
 
-let Ending = function() {
-    let seq = [
+Draw.epilogue = function() {
+    Draw.sequence([
         () => { Bgm.run("none"); },
 	"\v長い戦いに、いきなり終止符が打たれた。",
-	() => { Map.replace(0x6f);
-                $("#map").css("background","#00ff00");
-              },
-	"\v気が付くと、そこに－//一人の少年が眠っていた。",
 	() => {
-	    ch.z = 0;
-            ch.muki = 0;
-	    Map.jump({map:4,loc:[20,109]});
-            Map.replace(0xec); // 国王
-            Map.replace(0xea, [19,109]); // ミド
-            Bgm.run("ending");
-            Draw.all();
+            Map.replace(0x6f);
+            ch.setdone("mido");
+            $("#map").css("background","#00ff00");
         },
-	"よくやった。ホントに ホントによくやった。//クムドール国民全員にかわって//お礼を申し上げたい。",
+	"\v気が付くと、そこに－\n一人の少年が眠っていた。",
 	() => {
-            $("#gamedisp div").hide();
-	    let $v = $('<div id="str">').css({
-		top:0, left:0, right:0, bottom:0, margin:"auto",position:"absolute",
-		fontFamily:"serif", fontWeight:"bold", fontSize:"100px", 
-		width:"100px", height:"100px", color:"black", lineHeight: "100px",
-	    }).text("終");
-	    $("#gamedisp").append($v).css("position","relative");
-            jwait(location.reload); 
-	},
-    ];
-    Draw.sequence(seq);
+            ch.z = 0;
+            ch.muki = 0;
+            ch.jt = [];
+            let jumpto;
+            if (ch.targetspeed == 5) {
+                jumpto = ch.isdone("grandsleep") ? {map:3,loc:[75,77]}:{map:4,loc:[20,109]};
+            }
+            if (ch.targetspeed == 4) {
+                ch.muki = 2;
+                jumpto = ({map:4,loc:[30,90]});
+            }
+            if (ch.targetspeed == 3) {
+                jumpto = ({map:4,loc:[20,109]});
+            }
+
+            $(window).unbind();
+            let init = {top:0, bottom:"auto"};
+            $("#curtain").removeClass("water").addClass("stair").show().css(init)
+	        .animate({height:"100%"}, ()=>{
+	            $("#curtain").hide().css("height",0);
+	            Map.jump(jumpto);
+                    Bgm.run("ending");
+                    Draw.all();
+                    ch.hanasu();
+                });
+        },
+        {wait:true},
+    ]);
+};
+
+let Ending = function() {
+    let seq = `
+惑星クムドールに異変が起きたA.P.(ポーラ暦)405年。|
+何処からともなく湧出する魔獣を蹴散らし、
+幾多の障壁を打ち破って再びクムドールに平和を取り戻したのは
+一人の地球人であったと伝えられている。|
+しかしハイテク兵器すら物ともしない魔獣達に対して使われた
+唯一の武器と言えば、もちろん魔法の剣などではなく
+あなたもよくご存知かと思うが…|
+最近そこいらでよく見かける、パソコンなどに付いている、
+あのありふれたキーボードだったのだ。|
+
+人々は異変の後、誰言うともなくキーボードの事を
+「クムドールの剣」と呼ぶようになった。`
+        .split("|").map(v => v.slice(1));
+    seq.unshift({func: () => {
+        Draw.barline = 12;
+        Draw.textbox();
+        $("#gamedisp,#bg").css("background","white").show();
+        $("#text").text("");
+        $("#textbox").css({
+	    width:"500px", height:"240px", background:"#eee", color: "#028",
+	    top:0, left:0, right:0, bottom:0, margin:"auto",position:"absolute",
+        }).hide().fadeIn();
+    }, timer:800});
+    seq.push(() => {
+        $("#textbox").fadeOut("slow", () => {
+            $("#textbox").removeClass("box").css({
+                background:"none", textAlign:"center",
+	        fontFamily:"serif", fontWeight:"bold", fontSize:"100px", 
+                color:"black", lineHeight: "240px",
+            }).text("終").hide().fadeIn("slow");
+        });
+    },{wait:true});
+    $("#gamedisp").fadeOut("slow", () => { Draw.sequence(seq); });
 };
 
 // j入力待ち

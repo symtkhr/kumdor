@@ -480,9 +480,10 @@ ch.remand = function()
 
 let wandering = function() {
     ch.state = "wandering";
-    $("#jtext, #keyboard, #score, #scriptbook, #inventory").hide();
+    $("#jtext, #bgdam, #keyboard, #score, #scriptbook, #inventory, #longscript, #enemy, #kagobox, #submenubox").hide();
     Draw.outfits();
     if(inDebug()) dumpdebug();
+    if (3 <= ch.dream) return jwait(Ending);
     
     // key待ち
     $(window).unbind().keydown(function(e) {

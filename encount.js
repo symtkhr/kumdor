@@ -445,7 +445,7 @@ const DreamPoint = function()
         if ((speed < ch.targetspeed * 10) || (20 < misrate)) return wandering();
         ch.dream++;
         let seq = Array(4).fill({func: () => $("#bgdam").toggle(), timer: 50});
-        if (3 <= ch.dream) seq.push(() => Ending(), {wait: true});
+        if (3 <= ch.dream) seq.push(() => Draw.epilogue(), {wait: true});
         Draw.sequence(seq);
     };
     let battle = {};
