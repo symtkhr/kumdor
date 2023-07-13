@@ -92,7 +92,8 @@ ch.record_wall = (map, p, replacer) =>
 	let x = (p.x - 44);
 	let y = (p.y - 88);
 	let n = parseInt(x / 4) + 8 * y;
-	let res = ch.walldp.split("").map(c => parseInt(c,16));
+        if (ch.walldp.length < 80) ch.walldp += "0".repeat(80);
+	let res = ch.walldp.split("").map(c => parseInt(c,16)).slice(0,80);
 	res[n] = res[n] | (1 << (x % 4));
 	ch.walldp = res.map(v => v.toString(16)).join("");
     } else {

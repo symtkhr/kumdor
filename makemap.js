@@ -506,7 +506,8 @@ const event_outmap = () => {
         {sym:0xaa, onspoken: () => OpenWall({replacer:0x2f, level:14}) },
         // クムの木とチャット
         {sym: 0x12, branch: (talks) => {
-            if (!ch.chattable)  return ch.isdone("tamaorin") ? "\v言葉が通じない。" : "\v" + NOT_FOUND;
+            const NOT_CHATTABLE = "\v言葉が通じない。";
+            if (!ch.chattable)  return ch.isdone("tamaorin") ? NOT_CHATTABLE : "\v" + NOT_FOUND;
             let to = ch.towhere();
             if (ch.tree.find(v => v[0] == ch.map && v[1].x == to.x && v[1].y == to.y)) return "\vクムの木は眠っている。";
 
@@ -516,7 +517,7 @@ const event_outmap = () => {
             let k = talks0[GetRand(talks0.length)];
             ch.treetalk.push(k);
             CLOG("addspeakevents");
-            Map.speakEvents.unshift({sym:0x12, loc:[to.x,to.y], branch: t => t[k]});
+            Map.speakEvents.unshift({sym:0x12, loc:[to.x,to.y], branch: t => ch.chattable ? t[k] : NOT_CHATTABLE });
             return talks[k];
         }},
         {sym: 0x93,"loc":[41,101],onspoken: (talks) => Map.rocktree(talks),

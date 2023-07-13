@@ -183,7 +183,7 @@ Savelist.dp0 = () => {
     Object.keys(ret).map(key => ch[key] = ret[key]);
     ch.done = ch.done.slice(0,-1);
     ch.life = ch.lifebox * LIFEBOX;
-    ch.walldp = "";
+    //ch.walldp = "";
 };
 
 Savelist.dp1 = () => {
